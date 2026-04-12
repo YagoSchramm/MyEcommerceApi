@@ -1,0 +1,59 @@
+package dto
+
+import (
+	"time"
+
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/util"
+	"github.com/google/uuid"
+)
+
+type CreateRatingDTO struct {
+	UserID      uuid.UUID
+	UserName    uuid.UUID `json:"user_name" db:"user_name"`
+	ProdutctID  uuid.UUID `json:"product_id" db:"product_id"`
+	PurchaseID  uuid.UUID `json:"purchase_id" db:"purchase_id"`
+	Description string    `json:"description" db:"description"`
+	Rating      float32   `json:"rating" db:"rating"`
+}
+type UpdateRatingDTO struct {
+	ID        uuid.UUID `json:"id" db:"rating_id"`
+	Rating    float32   `json:"rating" db:"rating"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+type DeleteRatingDTO struct {
+	ID        uuid.UUID  `json:"id" db:"rating_id"`
+	DeletedAt *time.Time `json:"deleted_at"`
+}
+type RatingResponseDTO struct {
+	ID          uuid.UUID `json:"id"`
+	UserName    uuid.UUID `json:"user_name" `
+	ProdutctID  uuid.UUID `json:"product_id" `
+	PurchaseID  uuid.UUID `json:"purchase_id" `
+	Rating      float32   `json:"rating" `
+	Description string    `json:"description" `
+}
+
+func ToRatingEntity(dto CreateRatingDTO) *entity.Rating {
+	return &entity.Rating{
+		ID:          *util.GenerateID(),
+		UserID:      dto.UserID,
+		PurchaseID:  dto.PurchaseID,
+		UserName:    dto.UserName,
+		ProdutctID:  dto.ProdutctID,
+		Description: dto.Description,
+		DeletedAt:   nil,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+}
+func ToRatingResponse(rating *entity.Rating) RatingResponseDTO {
+	return RatingResponseDTO{
+		ID:          rating.ID,
+		UserName:    rating.UserName,
+		ProdutctID:  rating.ProdutctID,
+		PurchaseID:  rating.PurchaseID,
+		Rating:      rating.Rating,
+		Description: rating.Description,
+	}
+}
