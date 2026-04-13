@@ -10,7 +10,7 @@ import (
 
 type CreateProductDTO struct {
 	UserID      uuid.UUID `json:"user_id" db:"user_id" validate:"required"`
-	UserName    uuid.UUID `json:"user_name" db:"user_name" validate:"required"`
+	UserName    string    `json:"user_name" db:"user_name" validate:"required"`
 	Name        string    `json:"name" validate:"required"`
 	Value       float32   `json:"value" validate:"required"`
 	Image       string    `json:"image" validate:"required"`
@@ -26,17 +26,20 @@ type UpdateProductDTO struct {
 	Description string  `json:"description" validate:"required"`
 }
 type DeleteProductDTO struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	ProductID uuid.UUID
 }
 type ProductResponse struct {
-	ID          uuid.UUID `json:"product_id" db:"product_id"`
-	UserName    uuid.UUID `json:"user_name" db:"user_name" validate:"required"`
-	Name        string    `json:"name" validate:"required"`
-	Value       float32   `json:"value" validate:"required"`
-	Image       string    `json:"image" validate:"required"`
-	Stock       int32     `json:"stock" validate:"required"`
-	Description string    `json:"description" validate:"required"`
+	ID           uuid.UUID `json:"product_id"`
+	UserName     string    `json:"user_name"`
+	Name         string    `json:"name"`
+	Value        float32   `json:"value"`
+	Image        string    `json:"image"`
+	Stock        int32     `json:"stock"`
+	Description  string    `json:"description"`
+	AvgRating    float32   `json:"avg_rating"`
+	TotalReviews int32     `json:"total_reviews"`
 }
 
 func ToProductEntity(dto CreateProductDTO) *entity.Product {
@@ -56,12 +59,14 @@ func ToProductEntity(dto CreateProductDTO) *entity.Product {
 }
 func ToProductResponse(product *entity.Product) ProductResponse {
 	return ProductResponse{
-		ID:          product.ID,
-		UserName:    product.UserName,
-		Name:        product.Name,
-		Image:       product.Image,
-		Value:       product.Value,
-		Stock:       product.Stock,
-		Description: product.Description,
+		ID:           product.ID,
+		UserName:     product.UserName,
+		Name:         product.Name,
+		Image:        product.Image,
+		Value:        product.Value,
+		Stock:        product.Stock,
+		Description:  product.Description,
+		AvgRating:    *product.AvgRating,
+		TotalReviews: product.TotalRatings,
 	}
 }

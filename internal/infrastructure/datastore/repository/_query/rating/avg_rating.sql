@@ -1,0 +1,1 @@
+SELECT AVG(rating) FROM ratings WHERE product_id=$1 AND deleted_at IS NULL;

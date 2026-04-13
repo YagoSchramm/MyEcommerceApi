@@ -7,6 +7,8 @@ CREATE TABLE products (
     image TEXT NOT NULL,
     stock INT NOT NULL,
     description TEXT NOT NULL,
+    avg_rating NUMERIC(3,2) DEFAULT 0,
+    total_reviews INT DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL,
     deleted_at TIMESTAMP NULL
