@@ -40,7 +40,7 @@ func ToRatingEntity(dto CreateRatingDTO) *entity.Rating {
 		UserID:      dto.UserID,
 		PurchaseID:  dto.PurchaseID,
 		UserName:    dto.UserName,
-		ProdutctID:  dto.ProdutctID,
+		ProductID:   dto.ProdutctID,
 		Description: dto.Description,
 		DeletedAt:   nil,
 		CreatedAt:   time.Now(),
@@ -51,7 +51,7 @@ func ToRatingResponse(rating *entity.Rating) RatingResponseDTO {
 	return RatingResponseDTO{
 		ID:          rating.ID,
 		UserName:    rating.UserName,
-		ProdutctID:  rating.ProdutctID,
+		ProdutctID:  rating.ProductID,
 		PurchaseID:  rating.PurchaseID,
 		Rating:      rating.Rating,
 		Description: rating.Description,
