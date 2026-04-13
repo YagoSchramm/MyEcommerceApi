@@ -20,11 +20,12 @@ type PurchaseResponseDTO struct {
 	Quantity  int       `json:"quantity"`
 }
 
-func ToPurchaseEntity(dto CreatePurchaseDTO) *entity.Purchase {
+func ToPurchaseEntity(dto CreatePurchaseDTO, price float32) *entity.Purchase {
 	return &entity.Purchase{
 		ID:        *util.GenerateID(),
 		ProductID: dto.ProductID,
 		UserID:    dto.UserID,
+		Value:     price,
 		Quantity:  dto.Quantity,
 		CreatedAt: time.Now(),
 	}
