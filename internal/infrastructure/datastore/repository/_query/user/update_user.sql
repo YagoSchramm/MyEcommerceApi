@@ -1,0 +1,1 @@
+UPDATE users SET name = COALESCE($1, name), roles = COALESCE($2, roles), updated_at = $3 WHERE id = $4 AND deleted_at IS NULL

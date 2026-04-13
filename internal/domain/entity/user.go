@@ -1,6 +1,10 @@
 package entity
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Role string
 
@@ -11,11 +15,14 @@ const (
 )
 
 type User struct {
-	ID       uuid.UUID `json:"user_id"`
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	Password string    `json:"password"`
-	Roles    []Role    `json:"roles"`
+	ID        uuid.UUID  `json:"user_id"`
+	Name      string     `json:"name"`
+	Email     string     `json:"email"`
+	Password  string     `json:"password"`
+	Roles     []Role     `json:"roles"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 // Domain Rules
