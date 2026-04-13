@@ -10,7 +10,7 @@ import (
 
 type CreateRatingDTO struct {
 	UserID      uuid.UUID
-	UserName    uuid.UUID `json:"user_name" db:"user_name"`
+	UserName    string    `json:"user_name" db:"user_name"`
 	ProdutctID  uuid.UUID `json:"product_id" db:"product_id"`
 	PurchaseID  uuid.UUID `json:"purchase_id" db:"purchase_id"`
 	Description string    `json:"description" db:"description"`
@@ -27,7 +27,7 @@ type DeleteRatingDTO struct {
 }
 type RatingResponseDTO struct {
 	ID          uuid.UUID `json:"id"`
-	UserName    uuid.UUID `json:"user_name" `
+	UserName    string    `json:"user_name" `
 	ProdutctID  uuid.UUID `json:"product_id" `
 	PurchaseID  uuid.UUID `json:"purchase_id" `
 	Rating      float32   `json:"rating" `

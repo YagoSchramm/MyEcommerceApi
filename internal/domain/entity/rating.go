@@ -9,7 +9,7 @@ import (
 type Rating struct {
 	ID          uuid.UUID  `json:"id" db:"rating_id"`
 	UserID      uuid.UUID  `json:"user_id" db:"user_id"`
-	UserName    uuid.UUID  `json:"user_name" db:"user_name"`
+	UserName    string     `json:"user_name" db:"user_name"`
 	PurchaseID  uuid.UUID  `json:"purchase_id" db:"purchase_id"`
 	ProdutctID  uuid.UUID  `json:"product_id" db:"product_id"`
 	Rating      float32    `json:"rating" db:"rating"`
