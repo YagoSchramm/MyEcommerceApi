@@ -25,6 +25,9 @@ var createProductQuery string
 //go:embed _query/product/delete_product.sql
 var deleteProductQuery string
 
+//go:embed _query/rating/avg_rating.sql
+var getAvgRating string
+
 //go:embed _query/product/getAll_product.sql
 var getAllProductQuery string
 
@@ -129,17 +132,23 @@ func (pr *ProductRepository) GetProductById(ctx context.Context, id string) (*en
 		&p.Name,
 		&p.Value,
 		&p.Image,
+		&p.AvgRating,
+		&p.TotalRatings,
 		&p.Stock,
 		&p.Description,
 		&p.CreatedAt,
 		&p.UpdatedAt,
 		&p.DeletedAt,
 	)
-
 	if err != nil {
 		return nil, err
 	}
-
+	err = pr.db.QueryRowContext(ctx, getAvgRating, id).Scan(
+		&p.AvgRating,
+	)
+	if err != nil {
+		return nil, err
+	}
 	return &p, nil
 }
 func (pr *ProductRepository) GetAllProducts(ctx context.Context) ([]*entity.Product, error) {
@@ -162,6 +171,8 @@ func (pr *ProductRepository) GetAllProducts(ctx context.Context) ([]*entity.Prod
 			&p.Value,
 			&p.Image,
 			&p.Stock,
+			&p.AvgRating,
+			&p.TotalRatings,
 			&p.Description,
 			&p.CreatedAt,
 			&p.UpdatedAt,
@@ -169,7 +180,12 @@ func (pr *ProductRepository) GetAllProducts(ctx context.Context) ([]*entity.Prod
 		if err != nil {
 			return nil, err
 		}
-
+		err = pr.db.QueryRowContext(ctx, getAvgRating, p.ID).Scan(
+			&p.AvgRating,
+		)
+		if err != nil {
+			return nil, err
+		}
 		products = append(products, &p)
 	}
 
