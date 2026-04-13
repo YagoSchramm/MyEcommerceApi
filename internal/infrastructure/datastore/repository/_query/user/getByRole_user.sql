@@ -1,0 +1,1 @@
+SELECT id, name, email, password, roles, created_at, updated_at, deleted_at FROM users WHERE $1 = ANY(roles) AND deleted_at IS NULL
