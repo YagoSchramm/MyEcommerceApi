@@ -22,8 +22,10 @@ type UpdateRatingDTO struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 type DeleteRatingDTO struct {
-	ID        uuid.UUID  `json:"id" db:"rating_id"`
-	DeletedAt *time.Time `json:"deleted_at"`
+	ID         uuid.UUID `json:"id" db:"rating_id"`
+	UserID     uuid.UUID
+	ProdutctID uuid.UUID  `json:"product_id" db:"product_id"`
+	DeletedAt  *time.Time `json:"deleted_at"`
 }
 type GetRatingByIdDTO struct {
 	ID uuid.UUID `json:"id" db:"rating_id"`
@@ -31,7 +33,7 @@ type GetRatingByIdDTO struct {
 type GetRatingByUserIdDTO struct {
 	UserID uuid.UUID `json:"user_id" db:"user_id"`
 }
-type GetAllByProductIdDTO struct {
+type GetAllRatingByProductIdDTO struct {
 	ProductID uuid.UUID `json:"product_id" db:"product_id"`
 }
 type RatingResponseDTO struct {

@@ -112,22 +112,21 @@ func (r *RatingRepository) UpdateRating(ctx context.Context, updateIt dto.Update
 
 	return tx.Commit()
 }
-func (r *RatingRepository) DeleteRating(ctx context.Context, id string, userID string, productId string) error {
+func (r *RatingRepository) DeleteRating(ctx context.Context, deletIt *dto.DeleteRatingDTO) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(ctx, updateProductRatingQuery, productId)
+	res, err := tx.ExecContext(ctx, deleteRatingQuery, deletIt.ID, deletIt.UserID)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	res, err := tx.ExecContext(ctx, deleteRatingQuery, id, userID)
+	_, err = tx.ExecContext(ctx, updateProductRatingQuery, deletIt.ProdutctID)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-
 	rows, _ := res.RowsAffected()
 	if rows == 0 {
 		tx.Rollback()
