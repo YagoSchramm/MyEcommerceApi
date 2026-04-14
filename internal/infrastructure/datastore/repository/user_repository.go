@@ -97,7 +97,7 @@ func (ur *UserRepository) UpdateUser(ctx context.Context, updateIt dto.UpdateUse
 	return tx.Commit()
 }
 
-func (ur *UserRepository) DeleteUser(ctx context.Context, deleteIt string) error {
+func (ur *UserRepository) DeleteUser(ctx context.Context, deleteIt dto.DeleteUserDTO) error {
 	tx, err := ur.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
