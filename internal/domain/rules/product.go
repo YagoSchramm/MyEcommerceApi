@@ -24,6 +24,18 @@ func ValidateCreateProduct(dto dto.CreateProductDTO) error {
 	return nil
 }
 func ValidateUpdateProduct(dto dto.UpdateProductDTO) error {
+	if !isValidName(dto.Name) {
+		return derr.InvalidNameErr
+	}
+	if !isValidPrice(dto.Value) {
+		return derr.InvalidPriceErr
+	}
+	if !isValidStock(int(dto.Stock)) {
+		return derr.InvalidStockErr
+	}
+	if !isValidDescription(dto.Description) {
+		return derr.InvalidDescriptionErr
+	}
 	return nil
 }
 func isValidPrice(price float32) bool {

@@ -83,6 +83,14 @@ func (p *PurchaseRepository) GetAllPurchaseByUserId(ctx context.Context, user_id
 	}
 	return purchaseList, nil
 }
+func (p *PurchaseRepository) GetPriceByProductId(ctx context.Context, product_id string) (float32, error) {
+	var price float32
+	err := p.db.QueryRowContext(ctx, "SELECT value FROM products WHERE product_id = $1", product_id).Scan(&price)
+	if err != nil {
+		return 0, err
+	}
+	return price, nil
+}
 func (p *PurchaseRepository) GetAllPurchases(ctx context.Context) ([]*entity.Purchase, error) {
 	rows, err := p.db.QueryContext(ctx, getAllPurchaseQuery)
 	if err != nil {
