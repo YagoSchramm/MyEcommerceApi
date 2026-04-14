@@ -1,6 +1,9 @@
 package rules
 
-import "github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+import (
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity/derr"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+)
 
 func ValidateCreatePurchase(dto dto.CreatePurchaseDTO) error {
 	if !isValidUserID(dto.UserID.String()) {

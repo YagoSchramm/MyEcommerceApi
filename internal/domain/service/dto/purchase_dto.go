@@ -39,7 +39,7 @@ func ToPurchaseEntity(dto CreatePurchaseDTO, price float32) *entity.Purchase {
 		CreatedAt: time.Now(),
 	}
 }
-func ToPurchaseRespone(purchase *entity.Purchase) PurchaseResponseDTO {
+func ToPurchaseResponse(purchase *entity.Purchase) PurchaseResponseDTO {
 	return PurchaseResponseDTO{
 		ID:        purchase.ID,
 		ProductID: purchase.ProductID,

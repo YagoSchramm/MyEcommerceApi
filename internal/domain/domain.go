@@ -30,7 +30,7 @@ type ProductService interface {
 type PurchaseService interface {
 	CreatePurchase(ctx context.Context, purchase *dto.CreatePurchaseDTO) error
 	GetPurchaseById(ctx context.Context, input *dto.GetPurchaseByIdDTO) (*dto.ProductResponse, error)
-	GetAllPurchaseByUserId(ctx context.Context, input *dto.GetAllPurchaseByUserIdDTO) ([]*dto.ProductResponse, error)
+	GetAllPurchaseByUserId(ctx context.Context, input *dto.GetAllPurchaseByUserIdDTO) ([]*dto.PurchaseResponseDTO, error)
 	GetAllPurchases(ctx context.Context, input *dto.GetAllPurchasesDTO) ([]*dto.PurchaseResponseDTO, error)
 }
 type RatingService interface {
