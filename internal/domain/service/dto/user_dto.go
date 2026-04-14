@@ -26,6 +26,18 @@ type UpdateUserDTO struct {
 	Name  *string        `json:"name,omitempty"`
 	Roles *[]entity.Role `json:"roles,omitempty"`
 }
+type DeleteUserDTO struct {
+	ID string `json:"id"`
+}
+type GetUserByIdDTO struct {
+	ID uuid.UUID `json:"id"`
+}
+type GetUserByRoleDTO struct {
+	Role string `json:"role"`
+}
+type GetAllUsersDTO struct {
+	ID uuid.UUID `json:"id"`
+}
 
 func ToUserEntity(dto CreateUserDTO) *entity.User {
 	now := time.Now()

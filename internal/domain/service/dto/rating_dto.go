@@ -25,6 +25,15 @@ type DeleteRatingDTO struct {
 	ID        uuid.UUID  `json:"id" db:"rating_id"`
 	DeletedAt *time.Time `json:"deleted_at"`
 }
+type GetRatingByIdDTO struct {
+	ID uuid.UUID `json:"id" db:"rating_id"`
+}
+type GetRatingByUserIdDTO struct {
+	UserID uuid.UUID `json:"user_id" db:"user_id"`
+}
+type GetAllByProductIdDTO struct {
+	ProductID uuid.UUID `json:"product_id" db:"product_id"`
+}
 type RatingResponseDTO struct {
 	ID          uuid.UUID `json:"id"`
 	UserName    string    `json:"user_name" `

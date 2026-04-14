@@ -14,6 +14,15 @@ type CreatePurchaseDTO struct {
 	UserID    uuid.UUID
 	Quantity  int `json:"quantity"`
 }
+type GetPurchaseByIdDTO struct {
+	ID uuid.UUID `json:"purchase_id"`
+}
+type GetAllPurchaseByUserIdDTO struct {
+	UserID uuid.UUID `json:"user_id"`
+}
+type GetAllPurchasesDTO struct {
+	ID uuid.UUID `json:"purchase_id"`
+}
 type PurchaseResponseDTO struct {
 	ID        uuid.UUID `json:"purchase_id"`
 	ProductID uuid.UUID `json:"product_id"`
