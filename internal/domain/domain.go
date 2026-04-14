@@ -39,5 +39,5 @@ type RatingService interface {
 	DeleteRating(ctx context.Context, deleteIt *dto.DeleteRatingDTO) error
 	GetRatingById(ctx context.Context, input *dto.GetRatingByIdDTO) (*dto.RatingResponseDTO, error)
 	GetRatingByUserId(ctx context.Context, input *dto.GetRatingByUserIdDTO) ([]*dto.RatingResponseDTO, error)
-	GetAllByProductId(ctx context.Context, input *dto.GetAllByProductIdDTO) ([]*dto.RatingResponseDTO, error)
+	GetAllByProductId(ctx context.Context, input *dto.GetAllRatingByProductIdDTO) ([]*dto.RatingResponseDTO, error)
 }

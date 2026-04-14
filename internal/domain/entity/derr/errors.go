@@ -25,3 +25,8 @@ var (
 	InvalidProductIDErr = errors.New("invalid product ID: product ID cannot be empty")
 	InvalidQuantityErr  = errors.New("invalid quantity: quantity must be greater than 0")
 )
+
+// Rating related errors
+var (
+	InvalidRatingErr = errors.New("invalid Rating: rating cannot be empty or be at least 0 and the maximum of 5")
+)
