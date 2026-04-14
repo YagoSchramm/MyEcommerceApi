@@ -19,3 +19,9 @@ var (
 	InvalidProductNameErr = errors.New("invalid product name: name cannot be empty and must be at least 2 characters long")
 	InvalidDescriptionErr = errors.New("invalid description: description cannot be empty and must be between 10 and 1000 characters long")
 )
+
+// Purchase related errors
+var (
+	InvalidProductIDErr = errors.New("invalid product ID: product ID cannot be empty")
+	InvalidQuantityErr  = errors.New("invalid quantity: quantity must be greater than 0")
+)
