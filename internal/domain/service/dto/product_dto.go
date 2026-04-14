@@ -30,6 +30,13 @@ type DeleteProductDTO struct {
 	UserID    uuid.UUID
 	ProductID uuid.UUID
 }
+type GetProductByIdDTO struct {
+	ID uuid.UUID
+}
+type GetAllProductsDTO struct {
+	ID uuid.UUID
+}
+
 type ProductResponse struct {
 	ID           uuid.UUID `json:"product_id"`
 	UserName     string    `json:"user_name"`
