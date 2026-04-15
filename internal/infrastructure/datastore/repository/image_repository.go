@@ -1,12 +1,38 @@
 package repository
 
-import "database/sql"
+import (
+	"io"
+	"mime/multipart"
+	"os"
+	"path/filepath"
+)
 
 type ImageRepository struct {
-	db *sql.DB
+	uploadDir string
 }
 
-func NewImageRepository(db *sql.DB) *ImageRepository {
-	return &ImageRepository{db: db}
+func NewImageRepository(uploadDir string) *ImageRepository {
+	return &ImageRepository{uploadDir: uploadDir}
 }
-func (*ImageRepository) Save()
+
+func (r *ImageRepository) Save(file multipart.File, filename string) (string, error) {
+
+	imagesDir := filepath.Join(r.uploadDir)
+
+	if err := os.MkdirAll(imagesDir, 0755); err != nil {
+		return "", err
+	}
+	path := filepath.Join(imagesDir, filename)
+	out, err := os.Create(path)
+	if err != nil {
+		return "", err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, file)
+	if err != nil {
+		return "", err
+	}
+
+	return "/uploads/" + filename, nil
+}
