@@ -9,7 +9,6 @@ import (
 )
 
 type CreatePurchaseDTO struct {
-	ID        uuid.UUID `json:"purchase_id"`
 	ProductID uuid.UUID `json:"product_id"`
 	UserID    uuid.UUID
 	Quantity  int `json:"quantity"`

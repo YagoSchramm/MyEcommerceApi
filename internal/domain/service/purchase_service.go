@@ -6,6 +6,7 @@ import (
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/rules"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
+	"github.com/google/uuid"
 )
 
 type PurchaseService struct {
@@ -15,15 +16,15 @@ type PurchaseService struct {
 func NewPurchaseService(repo *repository.PurchaseRepository) *PurchaseService {
 	return &PurchaseService{repo: repo}
 }
-func (srv *PurchaseService) CreatePurchase(ctx context.Context, purchase *dto.CreatePurchaseDTO) error {
+func (srv *PurchaseService) CreatePurchase(ctx context.Context, purchase *dto.CreatePurchaseDTO) (*uuid.UUID, error) {
 	price, err := srv.repo.GetPriceByProductId(ctx, purchase.ProductID.String())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	value := price * float32(purchase.Quantity)
 	err = rules.ValidateCreatePurchase(*purchase)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	purchaseEntity := dto.ToPurchaseEntity(*purchase, value)
 	return srv.repo.CreatePurchase(ctx, *purchaseEntity)

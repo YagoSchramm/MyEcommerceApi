@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"fmt"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
+	"github.com/google/uuid"
 )
 
 type PurchaseRepository struct {
@@ -28,8 +30,28 @@ var findPurchaseByIdQuery string
 //go:embed _query/purchase/getAll_purchase.sql
 var getAllPurchaseQuery string
 
-func (p *PurchaseRepository) CreatePurchase(ctx context.Context, input entity.Purchase) error {
-	_, err := p.db.ExecContext(ctx, createPurchaseQuery,
+//go:embed _query/product/update_stock.sql
+var updateStockQuery string
+
+func (p *PurchaseRepository) CreatePurchase(ctx context.Context, input entity.Purchase) (*uuid.UUID, error) {
+	tx, err := p.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// First, check if there's enough stock
+	var currentStock int32
+	err = tx.QueryRowContext(ctx, "SELECT stock FROM products WHERE id = $1 AND deleted_at IS NULL FOR UPDATE", input.ProductID).Scan(&currentStock)
+	if err != nil {
+		return nil, err
+	}
+	if currentStock < int32(input.Quantity) {
+		return nil, fmt.Errorf("insufficient stock: requested %d, available %d", input.Quantity, currentStock)
+	}
+
+	// Insert the purchase
+	_, err = tx.ExecContext(ctx, createPurchaseQuery,
 		input.ID,
 		input.ProductID,
 		input.UserID,
@@ -37,8 +59,24 @@ func (p *PurchaseRepository) CreatePurchase(ctx context.Context, input entity.Pu
 		input.Quantity,
 		input.CreatedAt,
 	)
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	// Update the stock
+	result, err := tx.ExecContext(ctx, updateStockQuery, input.Quantity, input.ProductID)
+	if err != nil {
+		return nil, err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if rowsAffected == 0 {
+		return nil, fmt.Errorf("failed to update stock: no rows affected")
+	}
+	tx.Commit()
+	return &input.ID, nil
 }
 func (p *PurchaseRepository) GetPurchaseById(ctx context.Context, id string) (*entity.Purchase, error) {
 	rows, err := p.db.QueryContext(ctx, findPurchaseByIdQuery, id)

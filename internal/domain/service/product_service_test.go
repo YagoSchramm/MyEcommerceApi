@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func BuildTest(t *testing.T) (*service.ProductService, uuid.UUID, string) {
+func buildProductTest(t *testing.T) (*service.ProductService, uuid.UUID, string) {
 	t.Helper()
 	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
 
@@ -33,7 +33,7 @@ func BuildTest(t *testing.T) (*service.ProductService, uuid.UUID, string) {
 	return productSrv, user[0].ID, user[0].Name
 }
 func TestProductService(t *testing.T) {
-	srv, user_id, username := BuildTest(t)
+	srv, user_id, username := buildProductTest(t)
 	var productId uuid.UUID
 	t.Run("Create Product", func(t *testing.T) {
 		ctx := context.TODO()
