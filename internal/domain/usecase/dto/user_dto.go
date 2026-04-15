@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/util"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/google/uuid"
 )
 
@@ -42,7 +42,7 @@ type GetAllUsersDTO struct {
 func ToUserEntity(dto CreateUserDTO) *entity.User {
 	now := time.Now()
 	return &entity.User{
-		ID:        *util.GenerateID(),
+		ID:        *service.GenerateID(),
 		Name:      dto.Name,
 		Email:     dto.Email,
 		Password:  dto.Password,

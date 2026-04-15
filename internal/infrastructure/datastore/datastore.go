@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 )
 
 type Store interface {
@@ -18,6 +18,7 @@ type UserRepository interface {
 	UpdateUser(ctx context.Context, updateIt dto.UpdateUserDTO) error
 	DeleteUser(ctx context.Context, deleteIt string) error
 	GetUserById(ctx context.Context, id string) (*entity.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*entity.User, error)
 	GetUserByRole(ctx context.Context, role entity.Role) ([]*entity.User, error)
 	GetAllUsers(ctx context.Context) ([]*entity.User, error)
 }

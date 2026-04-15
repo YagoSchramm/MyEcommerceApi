@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 )
 
 type UserRepository struct {
@@ -122,6 +122,25 @@ func (ur *UserRepository) GetUserById(ctx context.Context, id string) (*entity.U
 	var u entity.User
 
 	err := ur.db.QueryRowContext(ctx, getUserByIdQuery, id).Scan(
+		&u.ID,
+		&u.Name,
+		&u.Email,
+		&u.Password,
+		&u.Roles,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.DeletedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}
+func (ur *UserRepository) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
+	var u entity.User
+
+	err := ur.db.QueryRowContext(ctx, getUserByIdQuery, email).Scan(
 		&u.ID,
 		&u.Name,
 		&u.Email,

@@ -2,7 +2,7 @@ package rules
 
 import (
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity/derr"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 )
 
 func ValidateCreatePurchase(dto dto.CreatePurchaseDTO) error {
