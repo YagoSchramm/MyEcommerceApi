@@ -9,14 +9,19 @@ import (
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/google/uuid"
 )
 
 type ProductRepository struct {
 	db *sql.DB
 }
 
-func NewProuductRepository(db *sql.DB) *ProductRepository {
+func NewProductRepository(db *sql.DB) *ProductRepository {
 	return &ProductRepository{db: db}
+}
+
+func NewProuductRepository(db *sql.DB) *ProductRepository {
+	return NewProductRepository(db)
 }
 
 //go:embed _query/product/create_product.sql
@@ -37,10 +42,10 @@ var getProductByIdQuery string
 //go:embed _query/product/update_product.sql
 var updateProductQuery string
 
-func (pr *ProductRepository) CreateProduct(ctx context.Context, input entity.Product) error {
+func (pr *ProductRepository) CreateProduct(ctx context.Context, input entity.Product) (*uuid.UUID, error) {
 	tx, err := pr.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	_, err = tx.ExecContext(
 		ctx,
@@ -59,10 +64,10 @@ func (pr *ProductRepository) CreateProduct(ctx context.Context, input entity.Pro
 
 	if err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
-
-	return tx.Commit()
+	tx.Commit()
+	return &input.ID, nil
 }
 func (pr *ProductRepository) UpdateProduct(ctx context.Context, updateIt dto.UpdateProductDTO) error {
 	tx, err := pr.db.BeginTx(ctx, nil)
