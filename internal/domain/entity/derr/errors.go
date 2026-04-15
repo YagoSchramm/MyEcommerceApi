@@ -30,3 +30,6 @@ var (
 var (
 	InvalidRatingErr = errors.New("invalid Rating: rating cannot be empty or be at least 0 and the maximum of 5")
 )
+var (
+	InvalidImageErr = errors.New("invalid image type or path")
+)

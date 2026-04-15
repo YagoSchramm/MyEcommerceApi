@@ -21,6 +21,10 @@ func (usc *ProductUsecase) CreateProduct(ctx context.Context, product *dto.Creat
 	if err != nil {
 		return nil, err
 	}
+	err = rules.ValidateImageFile(product.Image)
+	if err != nil {
+		return nil, err
+	}
 	productEntity := dto.ToProductEntity(*product)
 	return usc.repo.CreateProduct(ctx, *productEntity)
 }

@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"context"
+	"mime/multipart"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
@@ -42,4 +43,7 @@ type PurchaseRepository interface {
 	GetPurchaseById(ctx context.Context, id string) (*entity.Purchase, error)
 	GetAllPurchaseByUserId(ctx context.Context, user_id string) ([]*entity.Purchase, error)
 	GetAllPurchases(ctx context.Context) ([]*entity.Purchase, error)
+}
+type ImageRepository interface {
+	Save(file multipart.File, filename string) (string, error)
 }

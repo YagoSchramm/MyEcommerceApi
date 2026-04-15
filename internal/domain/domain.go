@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"mime/multipart"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 )
@@ -40,4 +41,7 @@ type RatingUsecase interface {
 	GetRatingById(ctx context.Context, input *dto.GetRatingByIdDTO) (*dto.RatingResponseDTO, error)
 	GetRatingByUserId(ctx context.Context, input *dto.GetRatingByUserIdDTO) ([]*dto.RatingResponseDTO, error)
 	GetAllByProductId(ctx context.Context, input *dto.GetAllRatingByProductIdDTO) ([]*dto.RatingResponseDTO, error)
+}
+type ImageUsecase interface {
+	Save(file multipart.File, filename string) (*dto.ImageResponseDTO, error)
 }
