@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 )
 
 type RatingRepository struct {

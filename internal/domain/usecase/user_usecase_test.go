@@ -1,18 +1,18 @@
-package service_test
+package usecase_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/foundation"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 	"github.com/google/uuid"
 )
 
-func buildUserTest(t *testing.T) (*service.UserService, uuid.UUID, func()) {
+func buildUserTest(t *testing.T) (*usecase.UserUsecase, uuid.UUID, func()) {
 	t.Helper()
 
 	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
@@ -22,7 +22,7 @@ func buildUserTest(t *testing.T) (*service.UserService, uuid.UUID, func()) {
 	}
 
 	userRepo := repository.NewUserRepository(db)
-	userSrv := service.NewUserService(userRepo)
+	userSrv := usecase.NewUserUsecase(userRepo)
 
 	email := "user-test-" + uuid.NewString() + "@example.com"
 	createDTO := &dto.CreateUserDTO{
@@ -50,13 +50,13 @@ func buildUserTest(t *testing.T) (*service.UserService, uuid.UUID, func()) {
 	return userSrv, userID, cleanup
 }
 
-func TestUserService(t *testing.T) {
-	srv, userID, cleanup := buildUserTest(t)
+func TestUserUsecase(t *testing.T) {
+	usc, userID, cleanup := buildUserTest(t)
 	defer cleanup()
 
 	t.Run("GetUserById", func(t *testing.T) {
 		input := &dto.GetUserByIdDTO{ID: userID}
-		user, err := srv.GetUserById(context.Background(), input)
+		user, err := usc.GetUserById(context.Background(), input)
 		if err != nil {
 			t.Fatalf("GetUserById falhou: %v", err)
 		}
@@ -67,7 +67,7 @@ func TestUserService(t *testing.T) {
 
 	t.Run("GetUserByRole", func(t *testing.T) {
 		input := &dto.GetUserByRoleDTO{Role: string(entity.RoleBuyer)}
-		users, err := srv.GetUserByRole(context.Background(), input)
+		users, err := usc.GetUserByRole(context.Background(), input)
 		if err != nil {
 			t.Fatalf("GetUserByRole falhou: %v", err)
 		}
@@ -78,7 +78,7 @@ func TestUserService(t *testing.T) {
 
 	t.Run("GetAllUsers", func(t *testing.T) {
 		input := &dto.GetAllUsersDTO{ID: uuid.New()}
-		users, err := srv.GetAllUsers(context.Background(), input)
+		users, err := usc.GetAllUsers(context.Background(), input)
 		if err != nil {
 			t.Fatalf("GetAllUsers falhou: %v", err)
 		}
@@ -95,11 +95,11 @@ func TestUserService(t *testing.T) {
 			Name:  &newName,
 			Roles: &roles,
 		}
-		if err := srv.UpdateUser(context.Background(), updateDTO); err != nil {
+		if err := usc.UpdateUser(context.Background(), updateDTO); err != nil {
 			t.Fatalf("UpdateUser falhou: %v", err)
 		}
 
-		updated, err := srv.GetUserById(context.Background(), &dto.GetUserByIdDTO{ID: userID})
+		updated, err := usc.GetUserById(context.Background(), &dto.GetUserByIdDTO{ID: userID})
 		if err != nil {
 			t.Fatalf("GetUserById após atualização falhou: %v", err)
 		}
@@ -109,11 +109,11 @@ func TestUserService(t *testing.T) {
 	})
 
 	t.Run("DeleteUser", func(t *testing.T) {
-		if err := srv.DeleteUser(context.Background(), &dto.DeleteUserDTO{ID: userID.String()}); err != nil {
+		if err := usc.DeleteUser(context.Background(), &dto.DeleteUserDTO{ID: userID.String()}); err != nil {
 			t.Fatalf("DeleteUser falhou: %v", err)
 		}
 
-		_, err := srv.GetUserById(context.Background(), &dto.GetUserByIdDTO{ID: userID})
+		_, err := usc.GetUserById(context.Background(), &dto.GetUserByIdDTO{ID: userID})
 		if err == nil {
 			t.Fatal("o get user não devia funcionar após deletar o usuário")
 		}

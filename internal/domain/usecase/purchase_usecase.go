@@ -1,23 +1,23 @@
-package service
+package usecase
 
 import (
 	"context"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/rules"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 	"github.com/google/uuid"
 )
 
-type PurchaseService struct {
+type PurchaseUsecase struct {
 	repo *repository.PurchaseRepository
 }
 
-func NewPurchaseService(repo *repository.PurchaseRepository) *PurchaseService {
-	return &PurchaseService{repo: repo}
+func NewPurchaseUsecase(repo *repository.PurchaseRepository) *PurchaseUsecase {
+	return &PurchaseUsecase{repo: repo}
 }
-func (srv *PurchaseService) CreatePurchase(ctx context.Context, purchase *dto.CreatePurchaseDTO) (*uuid.UUID, error) {
-	price, err := srv.repo.GetPriceByProductId(ctx, purchase.ProductID.String())
+func (usc *PurchaseUsecase) CreatePurchase(ctx context.Context, purchase *dto.CreatePurchaseDTO) (*uuid.UUID, error) {
+	price, err := usc.repo.GetPriceByProductId(ctx, purchase.ProductID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -27,18 +27,18 @@ func (srv *PurchaseService) CreatePurchase(ctx context.Context, purchase *dto.Cr
 		return nil, err
 	}
 	purchaseEntity := dto.ToPurchaseEntity(*purchase, value)
-	return srv.repo.CreatePurchase(ctx, *purchaseEntity)
+	return usc.repo.CreatePurchase(ctx, *purchaseEntity)
 }
-func (srv *PurchaseService) GetPurchaseById(ctx context.Context, input *dto.GetPurchaseByIdDTO) (*dto.PurchaseResponseDTO, error) {
-	purchaseEntity, err := srv.repo.GetPurchaseById(ctx, input.ID.String())
+func (usc *PurchaseUsecase) GetPurchaseById(ctx context.Context, input *dto.GetPurchaseByIdDTO) (*dto.PurchaseResponseDTO, error) {
+	purchaseEntity, err := usc.repo.GetPurchaseById(ctx, input.ID.String())
 	if err != nil {
 		return nil, err
 	}
 	purchase := dto.ToPurchaseResponse(purchaseEntity)
 	return &purchase, nil
 }
-func (srv *PurchaseService) GetAllPurchaseByUserId(ctx context.Context, input *dto.GetAllPurchaseByUserIdDTO) ([]*dto.PurchaseResponseDTO, error) {
-	purchaseList, err := srv.repo.GetAllPurchaseByUserId(ctx, input.UserID.String())
+func (usc *PurchaseUsecase) GetAllPurchaseByUserId(ctx context.Context, input *dto.GetAllPurchaseByUserIdDTO) ([]*dto.PurchaseResponseDTO, error) {
+	purchaseList, err := usc.repo.GetAllPurchaseByUserId(ctx, input.UserID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +49,8 @@ func (srv *PurchaseService) GetAllPurchaseByUserId(ctx context.Context, input *d
 	}
 	return purchaseListResponse, err
 }
-func (srv *PurchaseService) GetAllPurchases(ctx context.Context, input *dto.GetAllPurchasesDTO) ([]*dto.PurchaseResponseDTO, error) {
-	purchaseList, err := srv.repo.GetAllPurchases(ctx)
+func (usc *PurchaseUsecase) GetAllPurchases(ctx context.Context, input *dto.GetAllPurchasesDTO) ([]*dto.PurchaseResponseDTO, error) {
+	purchaseList, err := usc.repo.GetAllPurchases(ctx)
 	if err != nil {
 		return nil, err
 	}

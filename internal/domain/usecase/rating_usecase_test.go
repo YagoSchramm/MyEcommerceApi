@@ -1,18 +1,18 @@
-package service_test
+package usecase_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/foundation"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 	"github.com/google/uuid"
 )
 
-func buildRatingTest(t *testing.T) (*service.RatingService, uuid.UUID, uuid.UUID, uuid.UUID, func()) {
+func buildRatingTest(t *testing.T) (*usecase.RatingUsecase, uuid.UUID, uuid.UUID, uuid.UUID, func()) {
 	t.Helper()
 
 	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
@@ -23,7 +23,7 @@ func buildRatingTest(t *testing.T) (*service.RatingService, uuid.UUID, uuid.UUID
 
 	// Create user
 	userRepo := repository.NewUserRepository(db)
-	userSrv := service.NewUserService(userRepo)
+	userSrv := usecase.NewUserUsecase(userRepo)
 	userEmail := "rating-user-" + uuid.NewString() + "@example.com"
 	userDTO := &dto.CreateUserDTO{
 		Name:     "Rating Test User",
@@ -45,7 +45,7 @@ func buildRatingTest(t *testing.T) (*service.RatingService, uuid.UUID, uuid.UUID
 
 	// Create product
 	productRepo := repository.NewProductRepository(db)
-	productSrv := service.NewProductService(*productRepo)
+	productSrv := usecase.NewProductUsecase(*productRepo)
 	productDTO := &dto.CreateProductDTO{
 		UserID:      userID,
 		UserName:    "Rating Test User",
@@ -70,7 +70,7 @@ func buildRatingTest(t *testing.T) (*service.RatingService, uuid.UUID, uuid.UUID
 
 	// Create purchase
 	purchaseRepo := repository.NewPurchaseRepository(db)
-	purchaseSrv := service.NewPurchaseService(purchaseRepo)
+	purchaseSrv := usecase.NewPurchaseUsecase(purchaseRepo)
 	purchaseDTO := &dto.CreatePurchaseDTO{
 		ProductID: productID,
 		UserID:    userID,
@@ -83,7 +83,7 @@ func buildRatingTest(t *testing.T) (*service.RatingService, uuid.UUID, uuid.UUID
 	}
 
 	ratingRepo := repository.NewRatingRepository(db)
-	ratingSrv := service.NewRatingService(ratingRepo)
+	ratingSrv := usecase.NewRatingUsecase(ratingRepo)
 
 	cleanup := func() {
 		db.Close()
@@ -92,8 +92,8 @@ func buildRatingTest(t *testing.T) (*service.RatingService, uuid.UUID, uuid.UUID
 	return ratingSrv, userID, productID, *purchaseID, cleanup
 }
 
-func TestRatingService(t *testing.T) {
-	srv, userID, productID, purchaseID, cleanup := buildRatingTest(t)
+func TestRatingUsecase(t *testing.T) {
+	usc, userID, productID, purchaseID, cleanup := buildRatingTest(t)
 	defer cleanup()
 
 	ctx := context.Background()
@@ -108,7 +108,7 @@ func TestRatingService(t *testing.T) {
 			Rating:      4.5,
 			Description: "Excelente produto, muito bom!",
 		}
-		err := srv.CreateRating(ctx, createDTO)
+		err := usc.CreateRating(ctx, createDTO)
 		if err != nil {
 			t.Fatalf("CreateRating falhou: %v", err)
 		}
@@ -117,7 +117,7 @@ func TestRatingService(t *testing.T) {
 
 	t.Run("GetRatingByUserId", func(t *testing.T) {
 		input := &dto.GetRatingByUserIdDTO{UserID: userID}
-		ratings, err := srv.GetRatingByUserId(ctx, input)
+		ratings, err := usc.GetRatingByUserId(ctx, input)
 		if err != nil {
 			t.Fatalf("GetRatingByUserId falhou: %v", err)
 		}
@@ -129,7 +129,7 @@ func TestRatingService(t *testing.T) {
 
 	t.Run("GetAllByProductId", func(t *testing.T) {
 		input := &dto.GetAllRatingByProductIdDTO{ProductID: productID}
-		ratings, err := srv.GetAllByProductId(ctx, input)
+		ratings, err := usc.GetAllByProductId(ctx, input)
 		if err != nil {
 			t.Fatalf("GetAllByProductId falhou: %v", err)
 		}
@@ -140,7 +140,7 @@ func TestRatingService(t *testing.T) {
 
 	t.Run("GetRatingById", func(t *testing.T) {
 		input := &dto.GetRatingByIdDTO{ID: ratingID}
-		rating, err := srv.GetRatingById(ctx, input)
+		rating, err := usc.GetRatingById(ctx, input)
 		if err != nil {
 			t.Fatalf("GetRatingById falhou: %v", err)
 		}
@@ -154,12 +154,12 @@ func TestRatingService(t *testing.T) {
 			ID:     ratingID,
 			Rating: 5.0,
 		}
-		err := srv.UpdateRating(ctx, updateDTO)
+		err := usc.UpdateRating(ctx, updateDTO)
 		if err != nil {
 			t.Fatalf("UpdateRating falhou: %v", err)
 		}
 
-		updated, err := srv.GetRatingById(ctx, &dto.GetRatingByIdDTO{ID: ratingID})
+		updated, err := usc.GetRatingById(ctx, &dto.GetRatingByIdDTO{ID: ratingID})
 		if err != nil {
 			t.Fatalf("GetRatingById após atualização falhou: %v", err)
 		}
@@ -174,12 +174,12 @@ func TestRatingService(t *testing.T) {
 			UserID:     userID,
 			ProdutctID: productID,
 		}
-		err := srv.DeletRating(ctx, deleteDTO)
+		err := usc.DeletRating(ctx, deleteDTO)
 		if err != nil {
 			t.Fatalf("DeleteRating falhou: %v", err)
 		}
 
-		_, err = srv.GetRatingById(ctx, &dto.GetRatingByIdDTO{ID: ratingID})
+		_, err = usc.GetRatingById(ctx, &dto.GetRatingByIdDTO{ID: ratingID})
 		if err == nil {
 			t.Fatal("esperado GetRatingById falhar após deletar")
 		}

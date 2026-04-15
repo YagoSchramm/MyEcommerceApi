@@ -4,7 +4,7 @@ import (
 	"regexp"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity/derr"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 )
 
 func ValidateCreateUser(user *dto.CreateUserDTO) error {

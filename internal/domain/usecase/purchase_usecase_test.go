@@ -1,35 +1,35 @@
-package service_test
+package usecase_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/foundation"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 	"github.com/google/uuid"
 )
 
-func buildPurchaseTest(t *testing.T) (*service.PurchaseService, uuid.UUID, uuid.UUID) {
+func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.UUID) {
 	t.Helper()
 	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
 
 	db, _ := foundation.NewPostgresDB(conn)
 	userRepo := repository.NewUserRepository(db)
-	userSrv := service.NewUserService(userRepo)
+	userUsc := usecase.NewUserUsecase(userRepo)
 	userMock := dto.CreateUserDTO{
 		Name:     "Yago",
 		Email:    "yago@gmail.com",
 		Password: "12345",
 		Roles:    []entity.Role{"admin"},
 	}
-	userSrv.CreateUser(context.TODO(), &userMock)
+	userUsc.CreateUser(context.TODO(), &userMock)
 
-	user, _ := userSrv.GetUserByRole(context.TODO(), &dto.GetUserByRoleDTO{Role: "admin"})
+	user, _ := userUsc.GetUserByRole(context.TODO(), &dto.GetUserByRoleDTO{Role: "admin"})
 	productRepo := repository.NewProductRepository(db)
-	productSrv := service.NewProductService(*productRepo)
+	productSrv := usecase.NewProductUsecase(*productRepo)
 	productMock := &dto.CreateProductDTO{
 		UserID:      user[0].ID,
 		UserName:    user[0].Name,
@@ -41,11 +41,11 @@ func buildPurchaseTest(t *testing.T) (*service.PurchaseService, uuid.UUID, uuid.
 	}
 	productId, _ := productSrv.CreateProduct(context.TODO(), productMock)
 	purchaseRepo := repository.NewPurchaseRepository(db)
-	purchaseSrv := service.NewPurchaseService(purchaseRepo)
-	return purchaseSrv, user[0].ID, *productId
+	PurchaseUsc := usecase.NewPurchaseUsecase(purchaseRepo)
+	return PurchaseUsc, user[0].ID, *productId
 }
 func TestPurchase(t *testing.T) {
-	srv, user_id, product_id := buildPurchaseTest(t)
+	usc, user_id, product_id := buildPurchaseTest(t)
 	var purchase_id *uuid.UUID
 	t.Run("Create Purchase", func(t *testing.T) {
 		ctx := context.TODO()
@@ -55,7 +55,7 @@ func TestPurchase(t *testing.T) {
 			Quantity:  2,
 		}
 		var err error
-		purchase_id, err = srv.CreatePurchase(ctx, purchase)
+		purchase_id, err = usc.CreatePurchase(ctx, purchase)
 		if err != nil {
 			t.Fatalf("Erro ao criar compra: %s", err)
 		}
@@ -65,7 +65,7 @@ func TestPurchase(t *testing.T) {
 		input := &dto.GetPurchaseByIdDTO{
 			ID: *purchase_id,
 		}
-		purchases, err := srv.GetPurchaseById(ctx, input)
+		purchases, err := usc.GetPurchaseById(ctx, input)
 		if err != nil {
 			t.Fatalf("Erro ao buscar compra: %s", err)
 
@@ -77,7 +77,7 @@ func TestPurchase(t *testing.T) {
 		input := &dto.GetAllPurchaseByUserIdDTO{
 			UserID: user_id,
 		}
-		purchases, err := srv.GetAllPurchaseByUserId(ctx, input)
+		purchases, err := usc.GetAllPurchaseByUserId(ctx, input)
 		if err != nil {
 			t.Fatalf("Erro ao buscar todas as compras do usuário: %s", err)
 
@@ -89,7 +89,7 @@ func TestPurchase(t *testing.T) {
 		input := &dto.GetAllPurchasesDTO{
 			ID: uuid.New(),
 		}
-		purchases, err := srv.GetAllPurchases(ctx, input)
+		purchases, err := usc.GetAllPurchases(ctx, input)
 		if err != nil {
 			t.Fatalf("Erro ao buscar todas as compras: %s", err)
 

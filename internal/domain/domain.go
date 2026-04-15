@@ -3,16 +3,16 @@ package domain
 import (
 	"context"
 
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 )
 
-type DomainService interface {
-	UserService
-	ProductService
-	PurchaseService
-	RatingService
+type DomainUsecase interface {
+	UserUsecase
+	ProductUsecase
+	PurchaseUsecase
+	RatingUsecase
 }
-type UserService interface {
+type UserUsecase interface {
 	CreateUser(ctx context.Context, user *dto.CreateUserDTO) error
 	UpdateUser(ctx context.Context, updateIt *dto.UpdateUserDTO) error
 	DeleteUser(ctx context.Context, deleteIt *dto.DeleteUserDTO) error
@@ -20,20 +20,20 @@ type UserService interface {
 	GetUserByRole(ctx context.Context, input *dto.GetUserByRoleDTO) ([]*dto.UserResponseDTO, error)
 	GetAllUsers(ctx context.Context, input *dto.GetAllUsersDTO) ([]*dto.UserResponseDTO, error)
 }
-type ProductService interface {
+type ProductUsecase interface {
 	CreateProduct(ctx context.Context, product *dto.CreateProductDTO) error
 	UpdateProduct(ctx context.Context, updateIt *dto.UpdateProductDTO) error
 	DeleteProduct(ctx context.Context, deleteIt *dto.DeleteProductDTO) error
 	GetProductById(ctx context.Context, input *dto.GetProductByIdDTO) (*dto.ProductResponse, error)
 	GetAllProducts(ctx context.Context, input *dto.GetAllProductsDTO) ([]*dto.ProductResponse, error)
 }
-type PurchaseService interface {
+type PurchaseUsecase interface {
 	CreatePurchase(ctx context.Context, purchase *dto.CreatePurchaseDTO) error
 	GetPurchaseById(ctx context.Context, input *dto.GetPurchaseByIdDTO) (*dto.ProductResponse, error)
 	GetAllPurchaseByUserId(ctx context.Context, input *dto.GetAllPurchaseByUserIdDTO) ([]*dto.PurchaseResponseDTO, error)
 	GetAllPurchases(ctx context.Context, input *dto.GetAllPurchasesDTO) ([]*dto.PurchaseResponseDTO, error)
 }
-type RatingService interface {
+type RatingUsecase interface {
 	CreateRating(ctx context.Context, rating *dto.CreateRatingDTO) error
 	UpdateRating(ctx context.Context, updateIt *dto.UpdateRatingDTO) error
 	DeleteRating(ctx context.Context, deleteIt *dto.DeleteRatingDTO) error
