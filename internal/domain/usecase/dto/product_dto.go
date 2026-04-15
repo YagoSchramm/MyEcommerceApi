@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/util"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/google/uuid"
 )
 
@@ -51,7 +51,7 @@ type ProductResponse struct {
 
 func ToProductEntity(dto CreateProductDTO) *entity.Product {
 	return &entity.Product{
-		ID:          *util.GenerateID(),
+		ID:          *service.GenerateID(),
 		UserID:      dto.UserID,
 		UserName:    dto.UserName,
 		Name:        dto.Name,

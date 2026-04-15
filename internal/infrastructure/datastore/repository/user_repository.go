@@ -137,6 +137,25 @@ func (ur *UserRepository) GetUserById(ctx context.Context, id string) (*entity.U
 
 	return &u, nil
 }
+func (ur *UserRepository) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
+	var u entity.User
+
+	err := ur.db.QueryRowContext(ctx, getUserByIdQuery, email).Scan(
+		&u.ID,
+		&u.Name,
+		&u.Email,
+		&u.Password,
+		&u.Roles,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.DeletedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}
 
 func (ur *UserRepository) GetUserByRole(ctx context.Context, role entity.Role) ([]*entity.User, error) {
 	rows, err := ur.db.QueryContext(ctx, getUserByRoleQuery, role)

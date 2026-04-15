@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/util"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/google/uuid"
 )
 
@@ -30,7 +30,7 @@ type PurchaseResponseDTO struct {
 
 func ToPurchaseEntity(dto CreatePurchaseDTO, price float32) *entity.Purchase {
 	return &entity.Purchase{
-		ID:        *util.GenerateID(),
+		ID:        *service.GenerateID(),
 		ProductID: dto.ProductID,
 		UserID:    dto.UserID,
 		Value:     price,

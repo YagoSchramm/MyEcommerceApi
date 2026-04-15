@@ -14,33 +14,37 @@ func NewTokenService(secret string) *TokenService {
 	return &TokenService{secret: secret}
 }
 
-type Claims struct {
-	UserID string `json:"user_id"`
-	Role   string `json:"role"`
+type AccessClaims struct {
+	UserID string   `json:"user_id"`
+	Roles  []string `json:"roles"`
+	jwt.RegisteredClaims
+}
+type RefreshClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (s *TokenService) GenerateTokens(userID, role string) (string, string, error) {
-	accessClaims := Claims{
+func (s *TokenService) GenerateTokens(userID string, roles []string) (string, string, error) {
+	atClaims := AccessClaims{
 		UserID: userID,
-		Role:   role,
+		Roles:  roles,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 		},
 	}
 
-	refreshClaims := jwt.RegisteredClaims{
-		Subject:   userID,
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
-	}
-
-	at := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 
 	accessToken, err := at.SignedString([]byte(s.secret))
 	if err != nil {
 		return "", "", err
 	}
+
+	rtClaims := jwt.RegisteredClaims{
+		Subject:   userID,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+	}
+
+	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 
 	refreshToken, err := rt.SignedString([]byte(s.secret))
 	if err != nil {
@@ -49,8 +53,8 @@ func (s *TokenService) GenerateTokens(userID, role string) (string, string, erro
 
 	return accessToken, refreshToken, nil
 }
-func (s *TokenService) ValidateAccessToken(tokenStr string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+func (s *TokenService) ValidateAccessToken(tokenStr string) (*AccessClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &AccessClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.secret), nil
 	})
 
@@ -58,7 +62,24 @@ func (s *TokenService) ValidateAccessToken(tokenStr string) (*Claims, error) {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(*Claims)
+	claims, ok := token.Claims.(*AccessClaims)
+	if !ok || !token.Valid {
+		return nil, err
+	}
+
+	return claims, nil
+}
+
+func (s *TokenService) ValidateRefreshToken(tokenStr string) (*RefreshClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(s.secret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*RefreshClaims)
 	if !ok || !token.Valid {
 		return nil, err
 	}
