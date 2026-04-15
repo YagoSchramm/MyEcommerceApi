@@ -1,11 +1,15 @@
 package foundation
 
-import "database/sql"
+import (
+	"database/sql"
 
-type PostgresDB struct {
-	conn *sql.Conn
-}
+	_ "github.com/lib/pq"
+)
 
-func NewPostgresDB(conn *sql.Conn) *PostgresDB {
-	return &PostgresDB{conn: conn}
+func NewPostgresDB(conn string) (*sql.DB, error) {
+	db, err := sql.Open("postgres", conn)
+	if err != nil {
+		return nil, err
+	}
+	return db, err
 }

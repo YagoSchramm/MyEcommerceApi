@@ -6,19 +6,20 @@ import (
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/rules"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/service/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
+	"github.com/google/uuid"
 )
 
 type ProductService struct {
-	repo *repository.ProductRepository
+	repo repository.ProductRepository
 }
 
-func NewProductService(repo *repository.ProductRepository) *ProductService {
+func NewProductService(repo repository.ProductRepository) *ProductService {
 	return &ProductService{repo: repo}
 }
-func (srv *ProductService) CreateProduct(ctx context.Context, product *dto.CreateProductDTO) error {
+func (srv *ProductService) CreateProduct(ctx context.Context, product *dto.CreateProductDTO) (*uuid.UUID, error) {
 	err := rules.ValidateCreateProduct(*product)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	productEntity := dto.ToProductEntity(*product)
 	return srv.repo.CreateProduct(ctx, *productEntity)
