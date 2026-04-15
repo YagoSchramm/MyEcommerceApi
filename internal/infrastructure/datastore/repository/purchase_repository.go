@@ -36,7 +36,7 @@ var updateStockQuery string
 func (p *PurchaseRepository) CreatePurchase(ctx context.Context, input entity.Purchase) (*uuid.UUID, error) {
 	tx, err := p.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer tx.Rollback()
 
