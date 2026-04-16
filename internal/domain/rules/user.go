@@ -48,9 +48,10 @@ func isValidEmail(email string) bool {
 	return regexp.MustCompile(emailRegex).MatchString(email)
 }
 func isValidPassword(password string) bool {
-	const passwordRegex = `^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$`
+	// Simplified password validation: at least 6 alphanumeric characters
+	const passwordRegex = `^[A-Za-z\d]{6,}$`
 	return regexp.MustCompile(passwordRegex).MatchString(password)
 }
 func isValidRole(role string) bool {
-	return role == "admin" || role == "customer" || role == "seller"
+	return role == "admin" || role == "buyer" || role == "seller"
 }

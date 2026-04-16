@@ -18,8 +18,11 @@ func NewUserHandler(usc *usecase.UserUsecase) *UserHandler {
 	return &UserHandler{usc: usc}
 }
 
-func (h *UserHandler) MountHandlers(r *mux.Router) {
+func (h *UserHandler) MountPublicHandlers(r *mux.Router) {
 	r.HandleFunc("/users", h.CreateUser).Methods("POST")
+}
+
+func (h *UserHandler) MountProtectedHandlers(r *mux.Router) {
 	r.HandleFunc("/users/{id}", h.GetUserById).Methods("GET")
 	r.HandleFunc("/users", h.GetAllUsers).Methods("GET")
 	r.HandleFunc("/users/{id}", h.UpdateUser).Methods("PUT")
