@@ -15,6 +15,16 @@ type CreateUserDTO struct {
 	Roles    []entity.Role `json:"roles"`
 }
 
+type LoginDTO struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+type LoginResponseDTO struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 type UserResponseDTO struct {
 	ID    uuid.UUID     `json:"id"`
 	Name  string        `json:"name"`

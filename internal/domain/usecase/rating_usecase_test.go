@@ -2,9 +2,11 @@ package usecase_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/foundation"
@@ -23,7 +25,9 @@ func buildRatingTest(t *testing.T) (*usecase.RatingUsecase, uuid.UUID, uuid.UUID
 
 	// Create user
 	userRepo := repository.NewUserRepository(db)
-	userSrv := usecase.NewUserUsecase(userRepo)
+	secret := os.Getenv("JWT-SECRET")
+	jwtSrv := service.NewTokenService(secret)
+	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
 	userEmail := "rating-user-" + uuid.NewString() + "@example.com"
 	userDTO := &dto.CreateUserDTO{
 		Name:     "Rating Test User",
@@ -31,7 +35,7 @@ func buildRatingTest(t *testing.T) (*usecase.RatingUsecase, uuid.UUID, uuid.UUID
 		Password: "password123",
 		Roles:    []entity.Role{entity.RoleBuyer, entity.RoleSeller},
 	}
-	if err := userSrv.CreateUser(context.Background(), userDTO); err != nil {
+	if err := userUsc.CreateUser(context.Background(), userDTO); err != nil {
 		_ = db.Close()
 		t.Fatalf("falha ao criar usuário: %v", err)
 	}
@@ -45,7 +49,7 @@ func buildRatingTest(t *testing.T) (*usecase.RatingUsecase, uuid.UUID, uuid.UUID
 
 	// Create product
 	productRepo := repository.NewProductRepository(db)
-	productSrv := usecase.NewProductUsecase(*productRepo)
+	productSrv := usecase.NewProductUsecase(productRepo)
 	productDTO := &dto.CreateProductDTO{
 		UserID:      userID,
 		UserName:    "Rating Test User",

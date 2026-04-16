@@ -4,6 +4,8 @@ import "errors"
 
 // User related errors
 var (
+	EncondingUserErr   = errors.New("error on decoding the user response to json")
+	DecondingUserErr   = errors.New("error on encoding the user from json")
 	InvalidNameErr     = errors.New("invalid name: name cannot be empty and must be at least 2 characters long")
 	InvalidEmailErr    = errors.New("invalid email: email cannot be empty")
 	EmptyPasswordErr   = errors.New("invalid password: password cannot be empty")
@@ -13,6 +15,8 @@ var (
 
 // Product related errors
 var (
+	EncondingProductErr   = errors.New("error on decoding the product response to json")
+	DecondingProductErr   = errors.New("error on encoding the product from json")
 	InvalidPriceErr       = errors.New("invalid price: price must be greater than 0")
 	InvalidStockErr       = errors.New("invalid stock: stock cannot be negative")
 	InvalidUserIDErr      = errors.New("invalid user ID: user ID cannot be empty")
@@ -22,13 +26,17 @@ var (
 
 // Purchase related errors
 var (
-	InvalidProductIDErr = errors.New("invalid product ID: product ID cannot be empty")
-	InvalidQuantityErr  = errors.New("invalid quantity: quantity must be greater than 0")
+	EncondingPurchaseErr = errors.New("error on decoding the purchase response to json")
+	DecondingPurchaseErr = errors.New("error on encoding the purchase from json")
+	InvalidProductIDErr  = errors.New("invalid product ID: product ID cannot be empty")
+	InvalidQuantityErr   = errors.New("invalid quantity: quantity must be greater than 0")
 )
 
 // Rating related errors
 var (
-	InvalidRatingErr = errors.New("invalid Rating: rating cannot be empty or be at least 0 and the maximum of 5")
+	EncondingRatingErr = errors.New("error on decoding the rating response to json")
+	DecondingRatingErr = errors.New("error on encoding the rating from json")
+	InvalidRatingErr   = errors.New("invalid Rating: rating cannot be empty or be at least 0 and the maximum of 5")
 )
 var (
 	InvalidImageErr = errors.New("invalid image type or path")

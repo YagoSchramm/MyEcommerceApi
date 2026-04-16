@@ -2,9 +2,11 @@ package usecase_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/foundation"
@@ -18,7 +20,9 @@ func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.
 
 	db, _ := foundation.NewPostgresDB(conn)
 	userRepo := repository.NewUserRepository(db)
-	userUsc := usecase.NewUserUsecase(userRepo)
+	secret := os.Getenv("JWT-SECRET")
+	jwtSrv := service.NewTokenService(secret)
+	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
 	userMock := dto.CreateUserDTO{
 		Name:     "Yago",
 		Email:    "yago@gmail.com",
@@ -29,7 +33,7 @@ func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.
 
 	user, _ := userUsc.GetUserByRole(context.TODO(), &dto.GetUserByRoleDTO{Role: "admin"})
 	productRepo := repository.NewProductRepository(db)
-	productSrv := usecase.NewProductUsecase(*productRepo)
+	productSrv := usecase.NewProductUsecase(productRepo)
 	productMock := &dto.CreateProductDTO{
 		UserID:      user[0].ID,
 		UserName:    user[0].Name,
