@@ -1,18 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"net/http"
 	"os"
-	"path/filepath"
-
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/handler"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/middleware"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
-	"github.com/YagoSchramm/myecommerce-api/internal/foundation"
-	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
-	"github.com/gorilla/mux"
 )
 
 func getEnv(key, defaultValue string) string {
@@ -23,64 +14,34 @@ func getEnv(key, defaultValue string) string {
 }
 
 func main() {
-	r := mux.NewRouter()
+	migrateFlag := flag.Bool("migrate", false, "Run database migrations")
+	flag.Parse()
 
-	// Database
+	// Database connection
 	dbHost := getEnv("DB_HOST", "localhost")
+	dbPort := getEnv("DB_PORT", "5432")
 	dbUser := getEnv("DB_USER", "user")
 	dbPassword := getEnv("DB_PASSWORD", "password")
 	dbName := getEnv("DB_NAME", "myecommerce")
 	dbSSLMode := getEnv("DB_SSLMODE", "disable")
 
-	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s", dbUser, dbPassword, dbHost, dbName, dbSSLMode)
-	db, err := foundation.NewPostgresDB(connStr)
-	if err != nil {
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
+
+	if *migrateFlag {
+		fmt.Println("Running database migrations...")
+		if err := runMigrations(connStr); err != nil {
+			fmt.Printf("Migration failed: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("Migrations completed successfully")
+		return
+	}
+
+	secret := getEnv("JWT_SECRET", "secret")
+	addr := getEnv("API_ADDR", ":8080")
+
+	api := NewApi(connStr, secret, addr)
+	if err := api.Start(); err != nil {
 		panic(err)
 	}
-	defer db.Close()
-
-	// Services
-	tokenService := service.NewTokenService("secret")
-
-	// Repositories
-	userRepo := repository.NewUserRepository(db)
-	productRepo := repository.NewProductRepository(db)
-	ratingRepo := repository.NewRatingRepository(db)
-	purchaseRepo := repository.NewPurchaseRepository(db)
-	imageRepo := repository.NewImageRepository("./uploads")
-
-	// Usecases
-	userUsecase := usecase.NewUserUsecase(userRepo, tokenService)
-	productUsecase := usecase.NewProductUsecase(productRepo)
-	ratingUsecase := usecase.NewRatingUsecase(ratingRepo)
-	purchaseUsecase := usecase.NewPurchaseUsecase(purchaseRepo)
-	imageUsecase := usecase.NewImageUsecase(imageRepo, "http://localhost:8080")
-
-	// Handlers
-	authHandler := handler.NewAuthHandler(userUsecase)
-	userHandler := handler.NewUserHandler(userUsecase)
-	productHandler := handler.NewProductHandler(productUsecase, userUsecase)
-	ratingHandler := handler.NewRatingHandler(ratingUsecase, userUsecase)
-	purchaseHandler := handler.NewPurchaseHandler(purchaseUsecase)
-	imageHandler := handler.NewImageHandler(imageUsecase)
-
-	// Mount handlers
-	authHandler.MountHandlers(r)
-	userHandler.MountHandlers(r)
-	imageHandler.MountHandlers(r)
-
-	// Protected routes
-	protected := r.PathPrefix("/").Subrouter()
-	protected.Use(middleware.AuthMiddleware(tokenService))
-
-	productHandler.MountHandlers(protected)
-	ratingHandler.MountHandlers(protected)
-	purchaseHandler.MountHandlers(protected)
-
-	// Static files
-	wd, _ := os.Getwd()
-	uploadDir := filepath.Join(wd, "./uploads")
-	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadDir))))
-
-	http.ListenAndServe(":8080", r)
 }

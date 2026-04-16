@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
@@ -120,13 +121,14 @@ func (ur *UserRepository) DeleteUser(ctx context.Context, deleteIt dto.DeleteUse
 
 func (ur *UserRepository) GetUserById(ctx context.Context, id string) (*entity.User, error) {
 	var u entity.User
+	var rolesStr string
 
 	err := ur.db.QueryRowContext(ctx, getUserByIdQuery, id).Scan(
 		&u.ID,
 		&u.Name,
 		&u.Email,
 		&u.Password,
-		&u.Roles,
+		&rolesStr,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 		&u.DeletedAt,
@@ -135,17 +137,21 @@ func (ur *UserRepository) GetUserById(ctx context.Context, id string) (*entity.U
 		return nil, err
 	}
 
+	// Convert PostgreSQL array string to []entity.Role
+	u.Roles = parseRolesFromString(rolesStr)
+
 	return &u, nil
 }
 func (ur *UserRepository) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
 	var u entity.User
+	var rolesStr string
 
 	err := ur.db.QueryRowContext(ctx, getUserByIdQuery, email).Scan(
 		&u.ID,
 		&u.Name,
 		&u.Email,
 		&u.Password,
-		&u.Roles,
+		&rolesStr,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 		&u.DeletedAt,
@@ -153,6 +159,9 @@ func (ur *UserRepository) GetUserByEmail(ctx context.Context, email string) (*en
 	if err != nil {
 		return nil, err
 	}
+
+	// Convert PostgreSQL array string to []entity.Role
+	u.Roles = parseRolesFromString(rolesStr)
 
 	return &u, nil
 }
@@ -168,13 +177,14 @@ func (ur *UserRepository) GetUserByRole(ctx context.Context, role entity.Role) (
 
 	for rows.Next() {
 		var u entity.User
+		var rolesStr string
 
 		err := rows.Scan(
 			&u.ID,
 			&u.Name,
 			&u.Email,
 			&u.Password,
-			&u.Roles,
+			&rolesStr,
 			&u.CreatedAt,
 			&u.UpdatedAt,
 			&u.DeletedAt,
@@ -182,6 +192,9 @@ func (ur *UserRepository) GetUserByRole(ctx context.Context, role entity.Role) (
 		if err != nil {
 			return nil, err
 		}
+
+		// Convert PostgreSQL array string to []entity.Role
+		u.Roles = parseRolesFromString(rolesStr)
 
 		users = append(users, &u)
 	}
@@ -200,13 +213,14 @@ func (ur *UserRepository) GetAllUsers(ctx context.Context) ([]*entity.User, erro
 
 	for rows.Next() {
 		var u entity.User
+		var rolesStr string
 
 		err := rows.Scan(
 			&u.ID,
 			&u.Name,
 			&u.Email,
 			&u.Password,
-			&u.Roles,
+			&rolesStr,
 			&u.CreatedAt,
 			&u.UpdatedAt,
 			&u.DeletedAt,
@@ -215,8 +229,35 @@ func (ur *UserRepository) GetAllUsers(ctx context.Context) ([]*entity.User, erro
 			return nil, err
 		}
 
+		// Convert PostgreSQL array string to []entity.Role
+		u.Roles = parseRolesFromString(rolesStr)
+
 		users = append(users, &u)
 	}
 
 	return users, nil
+}
+
+// parseRolesFromString converts PostgreSQL array string format "{role1,role2}" to []entity.Role
+func parseRolesFromString(rolesStr string) []entity.Role {
+	if rolesStr == "" || rolesStr == "{}" {
+		return []entity.Role{}
+	}
+
+	// Remove braces and split by comma
+	rolesStr = strings.Trim(rolesStr, "{}")
+	if rolesStr == "" {
+		return []entity.Role{}
+	}
+
+	roleStrings := strings.Split(rolesStr, ",")
+	roles := make([]entity.Role, len(roleStrings))
+
+	for i, roleStr := range roleStrings {
+		// Trim quotes if present
+		roleStr = strings.Trim(roleStr, `"`)
+		roles[i] = entity.Role(roleStr)
+	}
+
+	return roles
 }
