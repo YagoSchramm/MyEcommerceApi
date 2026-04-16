@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
+	"github.com/gorilla/mux"
 )
 
 type ImageHandler struct {
@@ -13,7 +14,10 @@ type ImageHandler struct {
 func NewImageHandler(uc *usecase.ImageUsecase) *ImageHandler {
 	return &ImageHandler{usecase: uc}
 }
-
+func (h *ImageHandler) MountHandlers(r *mux.Router) {
+	r.HandleFunc("/image/save", h.Save).Methods("POST")
+	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads/"))))
+}
 func (h *ImageHandler) Save(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {

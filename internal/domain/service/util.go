@@ -38,7 +38,7 @@ func HasAnyRole(userRoles, allowedRoles []string) bool {
 	return false
 }
 func GetUserID(ctx context.Context) (string, bool) {
-	id, ok := ctx.Value("user_id").(string)
+	id, ok := ctx.Value("userID").(string)
 	return id, ok
 }
 

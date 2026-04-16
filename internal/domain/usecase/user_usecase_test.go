@@ -2,9 +2,11 @@ package usecase_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/foundation"
@@ -22,7 +24,9 @@ func buildUserTest(t *testing.T) (*usecase.UserUsecase, uuid.UUID, func()) {
 	}
 
 	userRepo := repository.NewUserRepository(db)
-	userSrv := usecase.NewUserUsecase(userRepo)
+	secret := os.Getenv("JWT-SECRET")
+	jwtSrv := service.NewTokenService(secret)
+	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
 
 	email := "user-test-" + uuid.NewString() + "@example.com"
 	createDTO := &dto.CreateUserDTO{
@@ -32,7 +36,7 @@ func buildUserTest(t *testing.T) (*usecase.UserUsecase, uuid.UUID, func()) {
 		Roles:    []entity.Role{entity.RoleBuyer},
 	}
 
-	if err := userSrv.CreateUser(context.Background(), createDTO); err != nil {
+	if err := userUsc.CreateUser(context.Background(), createDTO); err != nil {
 		t.Fatalf("falha ao criar usuário: %v", err)
 	}
 
@@ -47,7 +51,7 @@ func buildUserTest(t *testing.T) (*usecase.UserUsecase, uuid.UUID, func()) {
 		db.Close()
 	}
 
-	return userSrv, userID, cleanup
+	return userUsc, userID, cleanup
 }
 
 func TestUserUsecase(t *testing.T) {
