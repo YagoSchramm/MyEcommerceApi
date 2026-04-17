@@ -1,6 +1,8 @@
 ﻿# MyEcommerce API
 
 API REST para um sistema de e-commerce construída em Go.
+Exemplo de front-end no repositório:
+https://github.com/YagoSchramm/Urban-co.
 
 ## Visão Geral
 
