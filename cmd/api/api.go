@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/handler"
 	domainMiddleware "github.com/YagoSchramm/myecommerce-api/internal/domain/middleware"
@@ -16,22 +17,23 @@ import (
 )
 
 type Api struct {
-	connStr string
-	secret  string
-	addr    string
+	connStr   string
+	secret    string
+	addr      string
+	cacheAddr string
 }
 
-func NewApi(connStr, secret, addr string) *Api {
+func NewApi(connStr, cacheAddr, secret, addr string) *Api {
 	return &Api{
-		connStr: connStr,
-		secret:  secret,
-		addr:    addr,
+		connStr:   connStr,
+		secret:    secret,
+		addr:      addr,
+		cacheAddr: cacheAddr,
 	}
 }
 
 func (api *Api) Start() error {
 	r := mux.NewRouter()
-
 	// Initialize logger
 	logger, err := foundation.NewLogger()
 	if err != nil {
@@ -47,9 +49,9 @@ func (api *Api) Start() error {
 		return err
 	}
 	defer db.Close()
-
+	rdb := foundation.NewClient(api.cacheAddr)
 	tokenService := service.NewTokenService(api.secret)
-
+	rateRepo := repository.NewRedisLimiter(rdb, 10, time.Second)
 	userRepo := repository.NewUserRepository(db)
 	productRepo := repository.NewProductRepository(db)
 	ratingRepo := repository.NewRatingRepository(db)
@@ -68,11 +70,11 @@ func (api *Api) Start() error {
 	ratingHandler := handler.NewRatingHandler(ratingUsecase, userUsecase)
 	purchaseHandler := handler.NewPurchaseHandler(purchaseUsecase)
 	imageHandler := handler.NewImageHandler(imageUsecase)
-
+	rateLimiting := domainMiddleware.NewRateLimitMiddleware(rateRepo)
 	authHandler.MountHandlers(r)
 	userHandler.MountPublicHandlers(r)
-
 	protected := r.PathPrefix("/").Subrouter()
+	protected.Use(rateLimiting.Handler)
 	protected.Use(domainMiddleware.AuthMiddleware(tokenService))
 	imageHandler.MountHandlers(protected)
 	userHandler.MountProtectedHandlers(protected)

@@ -47,3 +47,7 @@ type PurchaseRepository interface {
 type ImageRepository interface {
 	Save(file multipart.File, filename string) (string, error)
 }
+
+type Limiter interface {
+	Allow(ctx context.Context, key string) (bool, error)
+}

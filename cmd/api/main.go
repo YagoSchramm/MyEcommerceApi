@@ -39,8 +39,8 @@ func main() {
 
 	secret := getEnv("JWT_SECRET", "secret")
 	addr := getEnv("API_ADDR", ":8080")
-
-	api := NewApi(connStr, secret, addr)
+	cacheAddr := getEnv("CACHE_ADDR", "localhost:")
+	api := NewApi(connStr, secret, addr, cacheAddr)
 	if err := api.Start(); err != nil {
 		panic(err)
 	}

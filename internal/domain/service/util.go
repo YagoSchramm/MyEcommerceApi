@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"net"
+	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -45,4 +48,26 @@ func GetUserID(ctx context.Context) (string, bool) {
 func GetRoles(ctx context.Context) ([]string, bool) {
 	roles, ok := ctx.Value("roles").([]string)
 	return roles, ok
+}
+func GetIp(r *http.Request) string {
+	xff := r.Header.Get("X-Forwarded-For")
+	if xff != "" {
+		ips := strings.Split(xff, ",")
+		ip := strings.TrimSpace(ips[0])
+		if ip != "" {
+			return ip
+		}
+	}
+
+	xrip := r.Header.Get("X-Real-IP")
+	if xrip != "" {
+		return xrip
+	}
+
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+
+	return ip
 }
