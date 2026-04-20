@@ -71,11 +71,10 @@ func (api *Api) Start() error {
 
 	authHandler.MountHandlers(r)
 	userHandler.MountPublicHandlers(r)
-	imageHandler.MountHandlers(r)
 
 	protected := r.PathPrefix("/").Subrouter()
 	protected.Use(domainMiddleware.AuthMiddleware(tokenService))
-
+	imageHandler.MountHandlers(protected)
 	userHandler.MountProtectedHandlers(protected)
 	productHandler.MountHandlers(protected)
 	ratingHandler.MountHandlers(protected)

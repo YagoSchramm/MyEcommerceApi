@@ -21,13 +21,13 @@ func (h *ImageHandler) MountHandlers(r *mux.Router) {
 func (h *ImageHandler) Save(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
-		http.Error(w, "erro ao processar", http.StatusBadRequest)
+		http.Error(w, "Processing Error", http.StatusBadRequest)
 		return
 	}
 
 	file, handler, err := r.FormFile("image")
 	if err != nil {
-		http.Error(w, "arquivo inválido", http.StatusBadRequest)
+		http.Error(w, "Invalid file", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()

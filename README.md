@@ -58,12 +58,12 @@ A API estará disponível em `http://localhost:8080`.
 
 - `POST /users` - criar usuário (público)
 - `POST /auth/login` - autenticar usuário (público)
-- `POST /auth/logout` - encerrar sessão (público)
-- `POST /image/save` - enviar imagem (público)
-- `GET /uploads/{file}` - acessar arquivo de imagem (público)
 
 ### Rotas protegidas (token obrigatório)
 
+- `POST /auth/logout` - encerrar sessão
+- `POST /image/save` - enviar imagem
+- `GET /uploads/{file}` - acessar arquivo de imagem
 - `GET /users` - listar usuários
 - `GET /users/{id}` - buscar usuário por ID
 - `PUT /users/{id}` - atualizar usuário
