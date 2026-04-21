@@ -16,16 +16,10 @@ func getEnv(key, defaultValue string) string {
 func main() {
 	migrateFlag := flag.Bool("migrate", false, "Run database migrations")
 	flag.Parse()
-
+	config := NewConfig()
 	// Database connection
-	dbHost := getEnv("DB_HOST", "localhost")
-	dbPort := getEnv("DB_PORT", "5432")
-	dbUser := getEnv("DB_USER", "user")
-	dbPassword := getEnv("DB_PASSWORD", "password")
-	dbName := getEnv("DB_NAME", "myecommerce")
-	dbSSLMode := getEnv("DB_SSLMODE", "disable")
 
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", config.dbUser, config.dbPassword, config.dbHost, config.dbPort, config.dbName, config.dbSSLMode)
 
 	if *migrateFlag {
 		fmt.Println("Running database migrations...")
@@ -37,10 +31,7 @@ func main() {
 		return
 	}
 
-	secret := getEnv("JWT_SECRET", "secret")
-	addr := getEnv("API_ADDR", ":8080")
-	cacheAddr := getEnv("CACHE_ADDR", "localhost:")
-	api := NewApi(connStr, secret, addr, cacheAddr)
+	api := NewApi(connStr, config.secret, config.addr, config.cacheAddr)
 	if err := api.Start(); err != nil {
 		panic(err)
 	}
