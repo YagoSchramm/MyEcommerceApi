@@ -85,6 +85,9 @@ func (api *Api) Start() error {
 	wd, _ := os.Getwd()
 	uploadDir := filepath.Join(wd, "./uploads")
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadDir))))
-
-	return http.ListenAndServe(api.addr, r)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	return http.ListenAndServe(port, r)
 }

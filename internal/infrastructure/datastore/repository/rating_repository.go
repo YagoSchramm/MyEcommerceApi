@@ -34,7 +34,7 @@ var getRatingByIdQuery string
 //go:embed _query/rating/getByProductId_rating.sql
 var getRatingByProductIdQuery string
 
-//go:embed _query/rating/getByuser_rating.sql
+//go:embed _query/rating/getByUser_rating.sql
 var getRatingByUserQuery string
 
 //go:embed _query/rating/validate_rating.sql

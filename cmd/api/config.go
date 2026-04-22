@@ -10,6 +10,7 @@ type Config struct {
 	secret     string
 	addr       string
 	cacheAddr  string
+	dbUrl      string
 }
 
 func NewConfig() *Config {
@@ -22,6 +23,7 @@ func NewConfig() *Config {
 		dbSSLMode:  getEnv("DB_SSLMODE", "disable"),
 		secret:     getEnv("JWT_SECRET", "secret"),
 		addr:       getEnv("API_ADDR", ":8080"),
-		cacheAddr:  getEnv("CACHE_ADDR", ":6379"),
+		cacheAddr:  getEnv("CACHE_ADDR", ""),
+		dbUrl:      getEnv("DB_URL", ""),
 	}
 }
