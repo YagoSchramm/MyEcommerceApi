@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -85,7 +86,7 @@ func (api *Api) Start() error {
 	wd, _ := os.Getwd()
 	uploadDir := filepath.Join(wd, "./uploads")
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadDir))))
-	port := os.Getenv("PORT")
+	port := fmt.Sprintf(":%s", os.Getenv("PORT"))
 	if port == "" {
 		port = "8080"
 	}
