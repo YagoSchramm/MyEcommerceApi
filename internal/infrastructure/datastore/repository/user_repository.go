@@ -104,7 +104,7 @@ func (ur *UserRepository) DeleteUser(ctx context.Context, deleteIt dto.DeleteUse
 		return err
 	}
 
-	res, err := tx.ExecContext(ctx, deleteUserQuery, time.Now(), deleteIt)
+	res, err := tx.ExecContext(ctx, deleteUserQuery, time.Now(), deleteIt.ID)
 	if err != nil {
 		tx.Rollback()
 		return err
