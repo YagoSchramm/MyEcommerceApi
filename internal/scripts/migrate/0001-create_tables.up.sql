@@ -11,7 +11,7 @@ CREATE TABLE users (
 CREATE TABLE products (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
-    user_name UUID NOT NULL,
+    user_name TEXT NOT NULL,
     name TEXT NOT NULL,
     value NUMERIC(10,2) NOT NULL,
     image TEXT NOT NULL,
