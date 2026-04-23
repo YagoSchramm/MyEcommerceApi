@@ -9,23 +9,13 @@ import (
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
-	"github.com/YagoSchramm/myecommerce-api/internal/foundation"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 	"github.com/google/uuid"
 )
 
 func buildRatingTest(t *testing.T) (*usecase.RatingUsecase, uuid.UUID, uuid.UUID, uuid.UUID, func()) {
 	t.Helper()
-
-	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
-	db, err := foundation.NewPostgresDB(conn)
-	if err != nil {
-		t.Skipf("Ignorando teste de integração porque a conexão com BD falhou: %v", err)
-	}
-	if err := db.Ping(); err != nil {
-		_ = db.Close()
-		t.Skipf("Ignorando teste de integração porque o BD está indisponível: %v", err)
-	}
+	db := openTestDB(t)
 
 	// Create user
 	userRepo := repository.NewUserRepository(db)

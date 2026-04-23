@@ -9,23 +9,13 @@ import (
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
-	"github.com/YagoSchramm/myecommerce-api/internal/foundation"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 	"github.com/google/uuid"
 )
 
 func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.UUID, func()) {
 	t.Helper()
-	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
-
-	db, err := foundation.NewPostgresDB(conn)
-	if err != nil {
-		t.Skipf("Skipping integration test because DB connection failed: %v", err)
-	}
-	if err := db.Ping(); err != nil {
-		_ = db.Close()
-		t.Skipf("Skipping integration test because DB is unavailable: %v", err)
-	}
+	db := openTestDB(t)
 
 	userRepo := repository.NewUserRepository(db)
 	secret := os.Getenv("JWT_SECRET")
