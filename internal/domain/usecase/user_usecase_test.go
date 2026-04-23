@@ -22,9 +22,13 @@ func buildUserTest(t *testing.T) (*usecase.UserUsecase, uuid.UUID, func()) {
 	if err != nil {
 		t.Skipf("Skipping integration test because DB connection failed: %v", err)
 	}
+	if err := db.Ping(); err != nil {
+		_ = db.Close()
+		t.Skipf("Skipping integration test because DB is unavailable: %v", err)
+	}
 
 	userRepo := repository.NewUserRepository(db)
-	secret := os.Getenv("JWT-SECRET")
+	secret := os.Getenv("JWT_SECRET")
 	jwtSrv := service.NewTokenService(secret)
 	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
 

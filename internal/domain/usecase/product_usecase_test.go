@@ -14,35 +14,58 @@ import (
 	"github.com/google/uuid"
 )
 
-func buildProductTest(t *testing.T) (*usecase.ProductUsecase, uuid.UUID, string) {
+func buildProductTest(t *testing.T) (*usecase.ProductUsecase, uuid.UUID, string, func()) {
 	t.Helper()
 	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
 
-	db, _ := foundation.NewPostgresDB(conn)
+	db, err := foundation.NewPostgresDB(conn)
+	if err != nil {
+		t.Skipf("Skipping integration test because DB connection failed: %v", err)
+	}
+	if err := db.Ping(); err != nil {
+		_ = db.Close()
+		t.Skipf("Skipping integration test because DB is unavailable: %v", err)
+	}
 	userRepo := repository.NewUserRepository(db)
-	secret := os.Getenv("JWT-SECRET")
+	secret := os.Getenv("JWT_SECRET")
 	jwtSrv := service.NewTokenService(secret)
 	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
+	email := "product-user-" + uuid.NewString() + "@example.com"
 	userMock := dto.CreateUserDTO{
 		Name:     "Yago",
-		Email:    "yago@gmail.com",
-		Password: "12345",
-		Roles:    []entity.Role{"admin"},
+		Email:    email,
+		Password: "password123",
+		Roles:    []entity.Role{entity.RoleAdmin},
 	}
-	userUsc.CreateUser(context.TODO(), &userMock)
+	if err := userUsc.CreateUser(context.Background(), &userMock); err != nil {
+		_ = db.Close()
+		t.Fatalf("falha ao criar usuÃ¡rio de teste: %v", err)
+	}
 
-	user, _ := userUsc.GetUserByRole(context.TODO(), &dto.GetUserByRoleDTO{Role: "admin"})
+	user, err := userUsc.GetUserByRole(context.Background(), &dto.GetUserByRoleDTO{Role: string(entity.RoleAdmin)})
+	if err != nil {
+		_ = db.Close()
+		t.Fatalf("falha ao buscar usuÃ¡rio por role: %v", err)
+	}
+	if len(user) == 0 {
+		_ = db.Close()
+		t.Fatal("esperado pelo menos um usuÃ¡rio admin no setup do teste")
+	}
 	productRepo := repository.NewProductRepository(db)
 	productSrv := usecase.NewProductUsecase(productRepo)
-	return productSrv, user[0].ID, user[0].Name
+	cleanup := func() {
+		_ = db.Close()
+	}
+	return productSrv, user[0].ID, user[0].Name, cleanup
 }
 func TestProductUsecase(t *testing.T) {
-	usc, user_id, username := buildProductTest(t)
+	usc, userID, username, cleanup := buildProductTest(t)
+	defer cleanup()
 	var productId uuid.UUID
 	t.Run("Create Product", func(t *testing.T) {
 		ctx := context.TODO()
 		productMock := &dto.CreateProductDTO{
-			UserID:      user_id,
+			UserID:      userID,
 			UserName:    username,
 			Name:        "Vaso de planta",
 			Value:       38.99,

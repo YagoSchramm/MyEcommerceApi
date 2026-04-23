@@ -22,10 +22,14 @@ func buildRatingTest(t *testing.T) (*usecase.RatingUsecase, uuid.UUID, uuid.UUID
 	if err != nil {
 		t.Skipf("Ignorando teste de integração porque a conexão com BD falhou: %v", err)
 	}
+	if err := db.Ping(); err != nil {
+		_ = db.Close()
+		t.Skipf("Ignorando teste de integração porque o BD está indisponível: %v", err)
+	}
 
 	// Create user
 	userRepo := repository.NewUserRepository(db)
-	secret := os.Getenv("JWT-SECRET")
+	secret := os.Getenv("JWT_SECRET")
 	jwtSrv := service.NewTokenService(secret)
 	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
 	userEmail := "rating-user-" + uuid.NewString() + "@example.com"

@@ -14,24 +14,46 @@ import (
 	"github.com/google/uuid"
 )
 
-func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.UUID) {
+func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.UUID, func()) {
 	t.Helper()
 	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
 
-	db, _ := foundation.NewPostgresDB(conn)
+	db, err := foundation.NewPostgresDB(conn)
+	if err != nil {
+		t.Skipf("Skipping integration test because DB connection failed: %v", err)
+	}
+	if err := db.Ping(); err != nil {
+		_ = db.Close()
+		t.Skipf("Skipping integration test because DB is unavailable: %v", err)
+	}
+
 	userRepo := repository.NewUserRepository(db)
-	secret := os.Getenv("JWT-SECRET")
+	secret := os.Getenv("JWT_SECRET")
 	jwtSrv := service.NewTokenService(secret)
 	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
+
+	email := "purchase-user-" + uuid.NewString() + "@example.com"
 	userMock := dto.CreateUserDTO{
 		Name:     "Yago",
-		Email:    "yago@gmail.com",
-		Password: "12345",
-		Roles:    []entity.Role{"admin"},
+		Email:    email,
+		Password: "password123",
+		Roles:    []entity.Role{entity.RoleAdmin},
 	}
-	userUsc.CreateUser(context.TODO(), &userMock)
+	if err := userUsc.CreateUser(context.Background(), &userMock); err != nil {
+		_ = db.Close()
+		t.Fatalf("falha ao criar usuário de teste: %v", err)
+	}
 
-	user, _ := userUsc.GetUserByRole(context.TODO(), &dto.GetUserByRoleDTO{Role: "admin"})
+	user, err := userUsc.GetUserByRole(context.Background(), &dto.GetUserByRoleDTO{Role: string(entity.RoleAdmin)})
+	if err != nil {
+		_ = db.Close()
+		t.Fatalf("falha ao buscar usuário por role: %v", err)
+	}
+	if len(user) == 0 {
+		_ = db.Close()
+		t.Fatal("esperado pelo menos um usuário admin no setup do teste")
+	}
+
 	productRepo := repository.NewProductRepository(db)
 	productSrv := usecase.NewProductUsecase(productRepo)
 	productMock := &dto.CreateProductDTO{
@@ -43,51 +65,65 @@ func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.
 		Stock:       54,
 		Description: "Um vaso de planta com 30 cm de altura e 10 cm de diâmetro",
 	}
-	productId, _ := productSrv.CreateProduct(context.TODO(), productMock)
+	productID, err := productSrv.CreateProduct(context.Background(), productMock)
+	if err != nil {
+		_ = db.Close()
+		t.Fatalf("falha ao criar produto de teste: %v", err)
+	}
+
 	purchaseRepo := repository.NewPurchaseRepository(db)
-	PurchaseUsc := usecase.NewPurchaseUsecase(purchaseRepo)
-	return PurchaseUsc, user[0].ID, *productId
+	purchaseUsc := usecase.NewPurchaseUsecase(purchaseRepo)
+	cleanup := func() {
+		_ = db.Close()
+	}
+
+	return purchaseUsc, user[0].ID, *productID, cleanup
 }
+
 func TestPurchase(t *testing.T) {
-	usc, user_id, product_id := buildPurchaseTest(t)
-	var purchase_id *uuid.UUID
+	usc, userID, productID, cleanup := buildPurchaseTest(t)
+	defer cleanup()
+
+	var purchaseID *uuid.UUID
+
 	t.Run("Create Purchase", func(t *testing.T) {
 		ctx := context.TODO()
 		purchase := &dto.CreatePurchaseDTO{
-			ProductID: product_id,
-			UserID:    user_id,
+			ProductID: productID,
+			UserID:    userID,
 			Quantity:  2,
 		}
 		var err error
-		purchase_id, err = usc.CreatePurchase(ctx, purchase)
+		purchaseID, err = usc.CreatePurchase(ctx, purchase)
 		if err != nil {
 			t.Fatalf("Erro ao criar compra: %s", err)
 		}
 	})
+
 	t.Run("Get Purchase By Id", func(t *testing.T) {
 		ctx := context.TODO()
 		input := &dto.GetPurchaseByIdDTO{
-			ID: *purchase_id,
+			ID: *purchaseID,
 		}
 		purchases, err := usc.GetPurchaseById(ctx, input)
 		if err != nil {
 			t.Fatalf("Erro ao buscar compra: %s", err)
-
 		}
 		t.Log(purchases)
 	})
+
 	t.Run("Get all Purchases By User Id", func(t *testing.T) {
 		ctx := context.TODO()
 		input := &dto.GetAllPurchaseByUserIdDTO{
-			UserID: user_id,
+			UserID: userID,
 		}
 		purchases, err := usc.GetAllPurchaseByUserId(ctx, input)
 		if err != nil {
 			t.Fatalf("Erro ao buscar todas as compras do usuário: %s", err)
-
 		}
 		t.Log(purchases)
 	})
+
 	t.Run("Get all Purchases", func(t *testing.T) {
 		ctx := context.TODO()
 		input := &dto.GetAllPurchasesDTO{
@@ -96,7 +132,6 @@ func TestPurchase(t *testing.T) {
 		purchases, err := usc.GetAllPurchases(ctx, input)
 		if err != nil {
 			t.Fatalf("Erro ao buscar todas as compras: %s", err)
-
 		}
 		t.Log(purchases)
 	})
