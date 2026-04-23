@@ -2,45 +2,19 @@ package usecase_test
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
-	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 	"github.com/google/uuid"
 )
 
 func buildUserTest(t *testing.T) (*usecase.UserUsecase, uuid.UUID, func()) {
 	t.Helper()
 
-	db := openTestDB(t)
-
-	userRepo := repository.NewUserRepository(db)
-	secret := os.Getenv("JWT_SECRET")
-	jwtSrv := service.NewTokenService(secret)
-	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
-
-	email := "user-test-" + uuid.NewString() + "@example.com"
-	createDTO := &dto.CreateUserDTO{
-		Name:     "Test User",
-		Email:    email,
-		Password: "password123",
-		Roles:    []entity.Role{entity.RoleBuyer},
-	}
-
-	if err := userUsc.CreateUser(context.Background(), createDTO); err != nil {
-		t.Fatalf("falha ao criar usuário: %v", err)
-	}
-
-	var userID uuid.UUID
-	row := db.QueryRowContext(context.Background(), "SELECT id FROM users WHERE email = $1 LIMIT 1", email)
-	if err := row.Scan(&userID); err != nil {
-		_ = db.Close()
-		t.Fatalf("falha ao localizar usuário criado: %v", err)
-	}
+	db := usecase.OpenTestDB(t)
+	userUsc, userID, _ := usecase.CreateTestUser(t, db, "Test User", "user-test-", []entity.Role{entity.RoleBuyer})
 
 	cleanup := func() {
 		db.Close()
@@ -60,7 +34,7 @@ func TestUserUsecase(t *testing.T) {
 			t.Fatalf("GetUserById falhou: %v", err)
 		}
 		if user == nil || user.ID != userID {
-			t.Fatalf("esperado id de usuário %v, obtido %v", userID, user)
+			t.Fatalf("esperado id de usuario %v, obtido %v", userID, user)
 		}
 	})
 
@@ -71,7 +45,7 @@ func TestUserUsecase(t *testing.T) {
 			t.Fatalf("GetUserByRole falhou: %v", err)
 		}
 		if len(users) == 0 {
-			t.Fatal("pelo menos um usuário com a role de comprador deveria existir")
+			t.Fatal("pelo menos um usuario com a role de comprador deveria existir")
 		}
 	})
 
@@ -82,7 +56,7 @@ func TestUserUsecase(t *testing.T) {
 			t.Fatalf("GetAllUsers falhou: %v", err)
 		}
 		if len(users) == 0 {
-			t.Fatal("pelo menos um usuário deveria ser retornado")
+			t.Fatal("pelo menos um usuario deveria ser retornado")
 		}
 	})
 
@@ -100,7 +74,7 @@ func TestUserUsecase(t *testing.T) {
 
 		updated, err := usc.GetUserById(context.Background(), &dto.GetUserByIdDTO{ID: userID})
 		if err != nil {
-			t.Fatalf("GetUserById após atualização falhou: %v", err)
+			t.Fatalf("GetUserById apos atualizacao falhou: %v", err)
 		}
 		if updated.Name != newName {
 			t.Fatalf("nome atualizado esperado %q, obtido %q", newName, updated.Name)
@@ -114,7 +88,7 @@ func TestUserUsecase(t *testing.T) {
 
 		_, err := usc.GetUserById(context.Background(), &dto.GetUserByIdDTO{ID: userID})
 		if err == nil {
-			t.Fatal("o get user não devia funcionar após deletar o usuário")
+			t.Fatal("o get user nao devia funcionar apos deletar o usuario")
 		}
 	})
 }

@@ -2,11 +2,9 @@ package usecase_test
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
@@ -15,33 +13,10 @@ import (
 
 func buildRatingTest(t *testing.T) (*usecase.RatingUsecase, uuid.UUID, uuid.UUID, uuid.UUID, func()) {
 	t.Helper()
-	db := openTestDB(t)
 
-	// Create user
-	userRepo := repository.NewUserRepository(db)
-	secret := os.Getenv("JWT_SECRET")
-	jwtSrv := service.NewTokenService(secret)
-	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
-	userEmail := "rating-user-" + uuid.NewString() + "@example.com"
-	userDTO := &dto.CreateUserDTO{
-		Name:     "Rating Test User",
-		Email:    userEmail,
-		Password: "password123",
-		Roles:    []entity.Role{entity.RoleBuyer, entity.RoleSeller},
-	}
-	if err := userUsc.CreateUser(context.Background(), userDTO); err != nil {
-		_ = db.Close()
-		t.Fatalf("falha ao criar usuário: %v", err)
-	}
+	db := usecase.OpenTestDB(t)
+	_, userID, _ := usecase.CreateTestUser(t, db, "Rating Test User", "rating-user-", []entity.Role{entity.RoleBuyer, entity.RoleSeller})
 
-	var userID uuid.UUID
-	row := db.QueryRowContext(context.Background(), "SELECT id FROM users WHERE email = $1 LIMIT 1", userEmail)
-	if err := row.Scan(&userID); err != nil {
-		_ = db.Close()
-		t.Fatalf("falha ao localizar usuário criado: %v", err)
-	}
-
-	// Create product
 	productRepo := repository.NewProductRepository(db)
 	productSrv := usecase.NewProductUsecase(productRepo)
 	productDTO := &dto.CreateProductDTO{
@@ -60,13 +35,12 @@ func buildRatingTest(t *testing.T) (*usecase.RatingUsecase, uuid.UUID, uuid.UUID
 	}
 
 	var productID uuid.UUID
-	row = db.QueryRowContext(context.Background(), "SELECT id FROM products WHERE name = $1 LIMIT 1", productDTO.Name)
+	row := db.QueryRowContext(context.Background(), "SELECT id FROM products WHERE name = $1 LIMIT 1", productDTO.Name)
 	if err := row.Scan(&productID); err != nil {
 		_ = db.Close()
 		t.Fatalf("falha ao localizar produto criado: %v", err)
 	}
 
-	// Create purchase
 	purchaseRepo := repository.NewPurchaseRepository(db)
 	purchaseSrv := usecase.NewPurchaseUsecase(purchaseRepo)
 	purchaseDTO := &dto.CreatePurchaseDTO{
@@ -110,7 +84,7 @@ func TestRatingUsecase(t *testing.T) {
 		if err != nil {
 			t.Fatalf("CreateRating falhou: %v", err)
 		}
-		t.Logf("Avaliação criada com sucesso para compra %s", purchaseID)
+		t.Logf("Avaliacao criada com sucesso para compra %s", purchaseID)
 	})
 
 	t.Run("GetRatingByUserId", func(t *testing.T) {
@@ -120,7 +94,7 @@ func TestRatingUsecase(t *testing.T) {
 			t.Fatalf("GetRatingByUserId falhou: %v", err)
 		}
 		if len(ratings) == 0 {
-			t.Fatalf("esperado pelo menos uma avaliação do usuário")
+			t.Fatalf("esperado pelo menos uma avaliacao do usuario")
 		}
 		ratingID = ratings[0].ID
 	})
@@ -132,7 +106,7 @@ func TestRatingUsecase(t *testing.T) {
 			t.Fatalf("GetAllByProductId falhou: %v", err)
 		}
 		if len(ratings) == 0 {
-			t.Fatalf("esperado pelo menos uma avaliação para o produto")
+			t.Fatalf("esperado pelo menos uma avaliacao para o produto")
 		}
 	})
 
@@ -143,7 +117,7 @@ func TestRatingUsecase(t *testing.T) {
 			t.Fatalf("GetRatingById falhou: %v", err)
 		}
 		if rating == nil || rating.ID != ratingID {
-			t.Fatalf("esperado id de avaliação %v, obtido %v", ratingID, rating)
+			t.Fatalf("esperado id de avaliacao %v, obtido %v", ratingID, rating)
 		}
 	})
 
@@ -159,10 +133,10 @@ func TestRatingUsecase(t *testing.T) {
 
 		updated, err := usc.GetRatingById(ctx, &dto.GetRatingByIdDTO{ID: ratingID})
 		if err != nil {
-			t.Fatalf("GetRatingById após atualização falhou: %v", err)
+			t.Fatalf("GetRatingById apos atualizacao falhou: %v", err)
 		}
 		if updated.Rating != 5.0 {
-			t.Fatalf("esperado avaliação 5.0, obtido %v", updated.Rating)
+			t.Fatalf("esperado avaliacao 5.0, obtido %v", updated.Rating)
 		}
 	})
 
@@ -179,7 +153,7 @@ func TestRatingUsecase(t *testing.T) {
 
 		_, err = usc.GetRatingById(ctx, &dto.GetRatingByIdDTO{ID: ratingID})
 		if err == nil {
-			t.Fatal("esperado GetRatingById falhar após deletar")
+			t.Fatal("esperado GetRatingById falhar apos deletar")
 		}
 	})
 }
