@@ -65,6 +65,11 @@ func ToProductEntity(dto CreateProductDTO) *entity.Product {
 	}
 }
 func ToProductResponse(product *entity.Product) ProductResponse {
+	var avgRating float32
+	if product.AvgRating != nil {
+		avgRating = *product.AvgRating
+	}
+
 	return ProductResponse{
 		ID:           product.ID,
 		UserName:     product.UserName,
@@ -73,7 +78,7 @@ func ToProductResponse(product *entity.Product) ProductResponse {
 		Value:        product.Value,
 		Stock:        product.Stock,
 		Description:  product.Description,
-		AvgRating:    *product.AvgRating,
+		AvgRating:    avgRating,
 		TotalReviews: product.TotalRatings,
 	}
 }
