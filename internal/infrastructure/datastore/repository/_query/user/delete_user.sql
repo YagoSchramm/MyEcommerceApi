@@ -1,0 +1,1 @@
+UPDATE users SET deleted_at = $1 WHERE id = $2
