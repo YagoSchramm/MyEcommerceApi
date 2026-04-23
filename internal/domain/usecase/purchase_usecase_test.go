@@ -61,9 +61,15 @@ func TestPurchase(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Erro ao criar compra: %s", err)
 		}
+		if purchaseID == nil {
+			t.Fatal("esperado id da compra criada")
+		}
 	})
 
 	t.Run("Get Purchase By Id", func(t *testing.T) {
+		if purchaseID == nil {
+			t.Fatal("compra nao foi criada")
+		}
 		ctx := context.TODO()
 		input := &dto.GetPurchaseByIdDTO{
 			ID: *purchaseID,

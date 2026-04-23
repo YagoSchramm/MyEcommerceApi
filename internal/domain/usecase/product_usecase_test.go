@@ -43,9 +43,17 @@ func TestProductUsecase(t *testing.T) {
 			Stock:       54,
 			Description: "Um vaso de planta com 30 cm de altura e 10 cm de diametro",
 		}
-		productID, err := usc.CreateProduct(ctx, productMock)
+		var err error
+		productIDPtr, err := usc.CreateProduct(ctx, productMock)
 		if err != nil {
 			t.Fatalf("Erro na criacao do produto: %s", err)
+		}
+		if productIDPtr == nil {
+			t.Fatal("esperado id do produto criado")
+		}
+		productID = *productIDPtr
+		if productID == uuid.Nil {
+			t.Fatal("esperado id do produto criado")
 		}
 		t.Log(productID)
 	})

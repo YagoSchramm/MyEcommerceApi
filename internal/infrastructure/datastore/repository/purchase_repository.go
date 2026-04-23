@@ -79,18 +79,14 @@ func (p *PurchaseRepository) CreatePurchase(ctx context.Context, input entity.Pu
 	return &input.ID, nil
 }
 func (p *PurchaseRepository) GetPurchaseById(ctx context.Context, id string) (*entity.Purchase, error) {
-	rows, err := p.db.QueryContext(ctx, findPurchaseByIdQuery, id)
-	if err != nil {
-		return nil, err
-	}
 	var purchase entity.Purchase
-	err = rows.Scan(
-		purchase.ID,
-		purchase.ProductID,
-		purchase.UserID,
-		purchase.Value,
-		purchase.Quantity,
-		purchase.CreatedAt,
+	err := p.db.QueryRowContext(ctx, findPurchaseByIdQuery, id).Scan(
+		&purchase.ID,
+		&purchase.ProductID,
+		&purchase.UserID,
+		&purchase.Value,
+		&purchase.Quantity,
+		&purchase.CreatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -107,12 +103,12 @@ func (p *PurchaseRepository) GetAllPurchaseByUserId(ctx context.Context, user_id
 	for rows.Next() {
 		var purchase entity.Purchase
 		err = rows.Scan(
-			purchase.ID,
-			purchase.ProductID,
-			purchase.UserID,
-			purchase.Value,
-			purchase.Quantity,
-			purchase.CreatedAt,
+			&purchase.ID,
+			&purchase.ProductID,
+			&purchase.UserID,
+			&purchase.Value,
+			&purchase.Quantity,
+			&purchase.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -123,7 +119,7 @@ func (p *PurchaseRepository) GetAllPurchaseByUserId(ctx context.Context, user_id
 }
 func (p *PurchaseRepository) GetPriceByProductId(ctx context.Context, product_id string) (float32, error) {
 	var price float32
-	err := p.db.QueryRowContext(ctx, "SELECT value FROM products WHERE product_id = $1", product_id).Scan(&price)
+	err := p.db.QueryRowContext(ctx, "SELECT value FROM products WHERE id = $1", product_id).Scan(&price)
 	if err != nil {
 		return 0, err
 	}
@@ -139,12 +135,12 @@ func (p *PurchaseRepository) GetAllPurchases(ctx context.Context) ([]*entity.Pur
 	for rows.Next() {
 		var purchase entity.Purchase
 		err = rows.Scan(
-			purchase.ID,
-			purchase.ProductID,
-			purchase.UserID,
-			purchase.Value,
-			purchase.Quantity,
-			purchase.CreatedAt,
+			&purchase.ID,
+			&purchase.ProductID,
+			&purchase.UserID,
+			&purchase.Value,
+			&purchase.Quantity,
+			&purchase.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
