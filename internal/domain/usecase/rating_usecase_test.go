@@ -28,10 +28,14 @@ func buildRatingTest(t *testing.T) (*usecase.RatingUsecase, uuid.UUID, uuid.UUID
 		Stock:       100,
 		Description: "A test product for rating integration testing with proper description length requirements.",
 	}
-	productErr, _ := productSrv.CreateProduct(context.Background(), productDTO)
-	if productErr != nil {
+	productIDPtr, err := productSrv.CreateProduct(context.Background(), productDTO)
+	if err != nil {
 		_ = db.Close()
-		t.Fatalf("falha ao criar produto: %v", productErr)
+		t.Fatalf("falha ao criar produto: %v", err)
+	}
+	if productIDPtr == nil {
+		_ = db.Close()
+		t.Fatal("falha ao criar produto: id retornado nulo")
 	}
 
 	var productID uuid.UUID
