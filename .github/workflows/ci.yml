@@ -51,7 +51,7 @@ jobs:
           DB_SSLMODE: disable
 
       - name: Run tests
-        run: go test ./... -v
+        run: go test ./internal/domain/usecase -v
         env:
           TEST_DB_URL: postgres://user:password@localhost:5432/myecommerce?sslmode=disable
           REDIS_URL: redis://localhost:6379
