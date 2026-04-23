@@ -2,11 +2,9 @@ package usecase_test
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
@@ -16,43 +14,24 @@ import (
 func buildProductTest(t *testing.T) (*usecase.ProductUsecase, uuid.UUID, string, func()) {
 	t.Helper()
 
-	db := openTestDB(t)
-	userRepo := repository.NewUserRepository(db)
-	secret := os.Getenv("JWT_SECRET")
-	jwtSrv := service.NewTokenService(secret)
-	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
-	email := "product-user-" + uuid.NewString() + "@example.com"
-	userMock := dto.CreateUserDTO{
-		Name:     "Yago",
-		Email:    email,
-		Password: "password123",
-		Roles:    []entity.Role{entity.RoleAdmin},
-	}
-	if err := userUsc.CreateUser(context.Background(), &userMock); err != nil {
-		_ = db.Close()
-		t.Fatalf("falha ao criar usuÃ¡rio de teste: %v", err)
-	}
+	db := usecase.OpenTestDB(t)
+	_, userID, username := usecase.CreateTestUser(t, db, "Yago", "product-user-", []entity.Role{entity.RoleAdmin})
 
-	user, err := userUsc.GetUserByRole(context.Background(), &dto.GetUserByRoleDTO{Role: string(entity.RoleAdmin)})
-	if err != nil {
-		_ = db.Close()
-		t.Fatalf("falha ao buscar usuÃ¡rio por role: %v", err)
-	}
-	if len(user) == 0 {
-		_ = db.Close()
-		t.Fatal("esperado pelo menos um usuÃ¡rio admin no setup do teste")
-	}
 	productRepo := repository.NewProductRepository(db)
 	productSrv := usecase.NewProductUsecase(productRepo)
 	cleanup := func() {
 		_ = db.Close()
 	}
-	return productSrv, user[0].ID, user[0].Name, cleanup
+
+	return productSrv, userID, username, cleanup
 }
+
 func TestProductUsecase(t *testing.T) {
 	usc, userID, username, cleanup := buildProductTest(t)
 	defer cleanup()
-	var productId uuid.UUID
+
+	var productID uuid.UUID
+
 	t.Run("Create Product", func(t *testing.T) {
 		ctx := context.TODO()
 		productMock := &dto.CreateProductDTO{
@@ -62,19 +41,19 @@ func TestProductUsecase(t *testing.T) {
 			Value:       38.99,
 			Image:       "example-product.jpg",
 			Stock:       54,
-			Description: "Um vaso de planta com 30 cm de altura e 10 cm de diâmetro",
+			Description: "Um vaso de planta com 30 cm de altura e 10 cm de diametro",
 		}
-		productId, err := usc.CreateProduct(ctx, productMock)
+		productID, err := usc.CreateProduct(ctx, productMock)
 		if err != nil {
-			t.Fatalf("Erro na criação do produto: %s", err)
+			t.Fatalf("Erro na criacao do produto: %s", err)
 		}
-		t.Log(productId)
-
+		t.Log(productID)
 	})
+
 	t.Run("Get Product By Id", func(t *testing.T) {
 		ctx := context.TODO()
 		input := &dto.GetProductByIdDTO{
-			ID: productId,
+			ID: productID,
 		}
 		product, err := usc.GetProductById(ctx, input)
 		if err != nil {
@@ -82,10 +61,11 @@ func TestProductUsecase(t *testing.T) {
 		}
 		t.Log(product)
 	})
+
 	t.Run("Get All Products", func(t *testing.T) {
 		ctx := context.TODO()
 		input := &dto.GetAllProductsDTO{
-			ID: productId,
+			ID: productID,
 		}
 		product, err := usc.GetAllProducts(ctx, input)
 		if err != nil {

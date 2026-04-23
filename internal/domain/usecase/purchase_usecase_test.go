@@ -2,11 +2,9 @@ package usecase_test
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
 	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
@@ -15,45 +13,20 @@ import (
 
 func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.UUID, func()) {
 	t.Helper()
-	db := openTestDB(t)
 
-	userRepo := repository.NewUserRepository(db)
-	secret := os.Getenv("JWT_SECRET")
-	jwtSrv := service.NewTokenService(secret)
-	userUsc := usecase.NewUserUsecase(userRepo, jwtSrv)
-
-	email := "purchase-user-" + uuid.NewString() + "@example.com"
-	userMock := dto.CreateUserDTO{
-		Name:     "Yago",
-		Email:    email,
-		Password: "password123",
-		Roles:    []entity.Role{entity.RoleAdmin},
-	}
-	if err := userUsc.CreateUser(context.Background(), &userMock); err != nil {
-		_ = db.Close()
-		t.Fatalf("falha ao criar usuário de teste: %v", err)
-	}
-
-	user, err := userUsc.GetUserByRole(context.Background(), &dto.GetUserByRoleDTO{Role: string(entity.RoleAdmin)})
-	if err != nil {
-		_ = db.Close()
-		t.Fatalf("falha ao buscar usuário por role: %v", err)
-	}
-	if len(user) == 0 {
-		_ = db.Close()
-		t.Fatal("esperado pelo menos um usuário admin no setup do teste")
-	}
+	db := usecase.OpenTestDB(t)
+	_, userID, username := usecase.CreateTestUser(t, db, "Yago", "purchase-user-", []entity.Role{entity.RoleAdmin})
 
 	productRepo := repository.NewProductRepository(db)
 	productSrv := usecase.NewProductUsecase(productRepo)
 	productMock := &dto.CreateProductDTO{
-		UserID:      user[0].ID,
-		UserName:    user[0].Name,
+		UserID:      userID,
+		UserName:    username,
 		Name:        "Vaso de planta",
 		Value:       38.99,
 		Image:       "example-purchase.jpg",
 		Stock:       54,
-		Description: "Um vaso de planta com 30 cm de altura e 10 cm de diâmetro",
+		Description: "Um vaso de planta com 30 cm de altura e 10 cm de diametro",
 	}
 	productID, err := productSrv.CreateProduct(context.Background(), productMock)
 	if err != nil {
@@ -67,7 +40,7 @@ func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.
 		_ = db.Close()
 	}
 
-	return purchaseUsc, user[0].ID, *productID, cleanup
+	return purchaseUsc, userID, *productID, cleanup
 }
 
 func TestPurchase(t *testing.T) {
@@ -109,7 +82,7 @@ func TestPurchase(t *testing.T) {
 		}
 		purchases, err := usc.GetAllPurchaseByUserId(ctx, input)
 		if err != nil {
-			t.Fatalf("Erro ao buscar todas as compras do usuário: %s", err)
+			t.Fatalf("Erro ao buscar todas as compras do usuario: %s", err)
 		}
 		t.Log(purchases)
 	})
