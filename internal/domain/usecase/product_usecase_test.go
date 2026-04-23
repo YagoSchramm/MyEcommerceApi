@@ -60,7 +60,7 @@ func TestProductUsecase(t *testing.T) {
 			UserName:    username,
 			Name:        "Vaso de planta",
 			Value:       38.99,
-			Image:       "google.com/example",
+			Image:       "example-product.jpg",
 			Stock:       54,
 			Description: "Um vaso de planta com 30 cm de altura e 10 cm de diâmetro",
 		}

@@ -51,7 +51,7 @@ func buildPurchaseTest(t *testing.T) (*usecase.PurchaseUsecase, uuid.UUID, uuid.
 		UserName:    user[0].Name,
 		Name:        "Vaso de planta",
 		Value:       38.99,
-		Image:       "google.com/example",
+		Image:       "example-purchase.jpg",
 		Stock:       54,
 		Description: "Um vaso de planta com 30 cm de altura e 10 cm de diâmetro",
 	}
