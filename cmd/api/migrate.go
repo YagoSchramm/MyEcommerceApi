@@ -3,15 +3,20 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 func runMigrations(connStr string) error {
+	if err := ensureDatabaseExists(connStr); err != nil {
+		return err
+	}
+
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
@@ -88,4 +93,53 @@ func runMigrations(connStr string) error {
 
 	fmt.Println("All migrations completed successfully")
 	return nil
+}
+
+func ensureDatabaseExists(connStr string) error {
+	dbName, maintenanceConn, err := maintenanceConnection(connStr)
+	if err != nil {
+		return err
+	}
+
+	adminDB, err := sql.Open("postgres", maintenanceConn)
+	if err != nil {
+		return fmt.Errorf("failed to connect to maintenance database: %w", err)
+	}
+	defer adminDB.Close()
+
+	if err := adminDB.Ping(); err != nil {
+		return fmt.Errorf("failed to ping maintenance database: %w", err)
+	}
+
+	var exists bool
+	if err := adminDB.QueryRow(`SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname = $1)`, dbName).Scan(&exists); err != nil {
+		return fmt.Errorf("failed to check database existence: %w", err)
+	}
+
+	if exists {
+		return nil
+	}
+
+	fmt.Printf("Database %s does not exist, creating it...\n", dbName)
+
+	if _, err := adminDB.Exec(fmt.Sprintf("CREATE DATABASE %s", pq.QuoteIdentifier(dbName))); err != nil {
+		return fmt.Errorf("failed to create database %q: %w", dbName, err)
+	}
+
+	return nil
+}
+
+func maintenanceConnection(connStr string) (string, string, error) {
+	parsed, err := url.Parse(connStr)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to parse database url: %w", err)
+	}
+
+	dbName := strings.TrimPrefix(parsed.Path, "/")
+	if dbName == "" {
+		return "", "", fmt.Errorf("database name is missing in connection string")
+	}
+
+	parsed.Path = "/postgres"
+	return dbName, parsed.String(), nil
 }

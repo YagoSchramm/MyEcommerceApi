@@ -15,7 +15,6 @@ jobs:
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: ecommerce
         ports:
           - 5432:5432
         options: >-
@@ -44,10 +43,15 @@ jobs:
       - name: Run migrations
         run: go run ./cmd/api -migrate
         env:
-          DATABASE_URL: postgres://user:password@localhost:5432/ecommerce?sslmode=disable
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: user
+          DB_PASSWORD: password
+          DB_NAME: myecommerce
+          DB_SSLMODE: disable
 
       - name: Run tests
         run: go test ./... -v
         env:
-          DATABASE_URL: postgres://user:password@localhost:5432/ecommerce?sslmode=disable
+          TEST_DB_URL: postgres://user:password@localhost:5432/myecommerce?sslmode=disable
           REDIS_URL: redis://localhost:6379
