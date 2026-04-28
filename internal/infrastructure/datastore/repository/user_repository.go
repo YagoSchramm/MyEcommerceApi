@@ -32,6 +32,9 @@ var getAllUserQuery string
 //go:embed _query/user/getById_user.sql
 var getUserByIdQuery string
 
+//go:embed _query/user/getByEmail_user.sql
+var getUserByEmailQuery string
+
 //go:embed _query/user/getByRole_user.sql
 var getUserByRoleQuery string
 
@@ -146,7 +149,7 @@ func (ur *UserRepository) GetUserByEmail(ctx context.Context, email string) (*en
 	var u entity.User
 	var rolesStr string
 
-	err := ur.db.QueryRowContext(ctx, getUserByIdQuery, email).Scan(
+	err := ur.db.QueryRowContext(ctx, getUserByEmailQuery, email).Scan(
 		&u.ID,
 		&u.Name,
 		&u.Email,
