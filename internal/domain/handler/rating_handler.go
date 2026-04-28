@@ -160,7 +160,7 @@ func (h *RatingHandler) DeleteRating(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.ratingUsc.DeletRating(r.Context(), &dto.DeleteRatingDTO{ID: id})
+	err = h.ratingUsc.DeleteRating(r.Context(), &dto.DeleteRatingDTO{ID: id})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

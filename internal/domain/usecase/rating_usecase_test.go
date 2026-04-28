@@ -150,7 +150,7 @@ func TestRatingUsecase(t *testing.T) {
 			UserID:     userID,
 			ProdutctID: productID,
 		}
-		err := usc.DeletRating(ctx, deleteDTO)
+		err := usc.DeleteRating(ctx, deleteDTO)
 		if err != nil {
 			t.Fatalf("DeleteRating falhou: %v", err)
 		}

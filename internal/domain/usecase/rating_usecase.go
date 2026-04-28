@@ -3,16 +3,16 @@ package usecase
 import (
 	"context"
 
+	"github.com/YagoSchramm/myecommerce-api/internal/domain"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/rules"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
-	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 )
 
 type RatingUsecase struct {
-	repo *repository.RatingRepository
+	repo domain.RatingRepository
 }
 
-func NewRatingUsecase(repo *repository.RatingRepository) *RatingUsecase {
+func NewRatingUsecase(repo domain.RatingRepository) *RatingUsecase {
 	return &RatingUsecase{repo: repo}
 }
 func (usc *RatingUsecase) CreateRating(ctx context.Context, rating *dto.CreateRatingDTO) error {
@@ -30,7 +30,7 @@ func (usc *RatingUsecase) UpdateRating(ctx context.Context, updateIt *dto.Update
 	}
 	return usc.repo.UpdateRating(ctx, *updateIt)
 }
-func (usc *RatingUsecase) DeletRating(ctx context.Context, deletIt *dto.DeleteRatingDTO) error {
+func (usc *RatingUsecase) DeleteRating(ctx context.Context, deletIt *dto.DeleteRatingDTO) error {
 	return usc.repo.DeleteRating(ctx, deletIt)
 }
 func (usc *RatingUsecase) GetRatingById(ctx context.Context, input *dto.GetRatingByIdDTO) (*dto.RatingResponseDTO, error) {

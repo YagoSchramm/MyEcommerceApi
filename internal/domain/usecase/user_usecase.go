@@ -3,19 +3,19 @@ package usecase
 import (
 	"context"
 
+	"github.com/YagoSchramm/myecommerce-api/internal/domain"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/rules"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
-	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 )
 
 type UserUsecase struct {
-	repo         *repository.UserRepository
-	tokenService *service.TokenService
+	repo         domain.UserRepository
+	tokenService domain.TokenService
 }
 
-func NewUserUsecase(repo *repository.UserRepository, tokenService *service.TokenService) *UserUsecase {
+func NewUserUsecase(repo domain.UserRepository, tokenService domain.TokenService) *UserUsecase {
 	return &UserUsecase{repo: repo, tokenService: tokenService}
 }
 func (usc *UserUsecase) CreateUser(ctx context.Context, user *dto.CreateUserDTO) error {

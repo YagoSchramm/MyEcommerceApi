@@ -3,32 +3,16 @@ package usecase
 import (
 	"errors"
 
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/entity"
-	"github.com/YagoSchramm/myecommerce-api/internal/domain/service"
+	"github.com/YagoSchramm/myecommerce-api/internal/domain"
 )
 
-type TokenService interface {
-	ValidateRefreshToken(tokenStr string) (*service.RefreshClaims, error)
-	GenerateTokens(userID string, roles []string) (string, string, error)
-}
-
-type RefreshRepository interface {
-	Save(userID, token string) error
-	Exists(userID, token string) bool
-	Delete(userID, token string) error
-}
-
-type UserRepository interface {
-	GetByID(userID string) (*entity.User, error)
-}
-
 type RefreshUseCase struct {
-	tokenService TokenService
-	refreshRepo  RefreshRepository
-	userRepo     UserRepository
+	tokenService domain.TokenService
+	refreshRepo  domain.RefreshTokenRepository
+	userRepo     domain.RefreshUserRepository
 }
 
-func NewRefreshUseCase(tokenService TokenService, refreshRepo RefreshRepository, userRepo UserRepository) *RefreshUseCase {
+func NewRefreshUseCase(tokenService domain.TokenService, refreshRepo domain.RefreshTokenRepository, userRepo domain.RefreshUserRepository) *RefreshUseCase {
 	return &RefreshUseCase{
 		tokenService: tokenService,
 		refreshRepo:  refreshRepo,

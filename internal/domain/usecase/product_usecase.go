@@ -3,17 +3,17 @@ package usecase
 import (
 	"context"
 
+	"github.com/YagoSchramm/myecommerce-api/internal/domain"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/rules"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
-	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 	"github.com/google/uuid"
 )
 
 type ProductUsecase struct {
-	repo *repository.ProductRepository
+	repo domain.ProductRepository
 }
 
-func NewProductUsecase(repo *repository.ProductRepository) *ProductUsecase {
+func NewProductUsecase(repo domain.ProductRepository) *ProductUsecase {
 	return &ProductUsecase{repo: repo}
 }
 func (usc *ProductUsecase) CreateProduct(ctx context.Context, product *dto.CreateProductDTO) (*uuid.UUID, error) {
