@@ -2,12 +2,13 @@ package foundation
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
 
-func NewClient(addr string) *redis.Client {
+func NewClient(addr string) (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:         addr,
 		DB:           1,
@@ -19,8 +20,9 @@ func NewClient(addr string) *redis.Client {
 	defer cancel()
 
 	if err := rdb.Ping(ctx).Err(); err != nil {
-		panic("failed to connect to redis: " + err.Error())
+		_ = rdb.Close()
+		return nil, fmt.Errorf("failed to connect to redis: %w", err)
 	}
 
-	return rdb
+	return rdb, nil
 }

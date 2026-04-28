@@ -3,17 +3,17 @@ package usecase
 import (
 	"context"
 
+	"github.com/YagoSchramm/myecommerce-api/internal/domain"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/rules"
 	"github.com/YagoSchramm/myecommerce-api/internal/domain/usecase/dto"
-	"github.com/YagoSchramm/myecommerce-api/internal/infrastructure/datastore/repository"
 	"github.com/google/uuid"
 )
 
 type PurchaseUsecase struct {
-	repo *repository.PurchaseRepository
+	repo domain.PurchaseRepository
 }
 
-func NewPurchaseUsecase(repo *repository.PurchaseRepository) *PurchaseUsecase {
+func NewPurchaseUsecase(repo domain.PurchaseRepository) *PurchaseUsecase {
 	return &PurchaseUsecase{repo: repo}
 }
 func (usc *PurchaseUsecase) CreatePurchase(ctx context.Context, purchase *dto.CreatePurchaseDTO) (*uuid.UUID, error) {

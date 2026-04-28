@@ -50,7 +50,13 @@ func (api *Api) Start() error {
 		return err
 	}
 	defer db.Close()
-	rdb := foundation.NewClient(api.cacheAddr)
+
+	rdb, err := foundation.NewClient(api.cacheAddr)
+	if err != nil {
+		return err
+	}
+	defer rdb.Close()
+
 	tokenService := service.NewTokenService(api.secret)
 	rateRepo := repository.NewRedisLimiter(rdb, 10, time.Second)
 	userRepo := repository.NewUserRepository(db)
